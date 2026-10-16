@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BX · Resultado por Veículo</title>
+<style>
+:root{
+  --bg:#070b14; --panel:#0b1120; --line:#151d30; --head:#0d1426;
+  --txt:#e8ecf5; --mut:#6b7794; --gold:#e8b94a; --gold2:#b8860b;
+  --teal:#2dd4bf; --red:#fb5a6e; --blue:#4da3ff; --yel:#fbbf24; --grn:#34d399;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--txt);font-family:-apple-system,"Segoe UI",Inter,Roboto,Arial,sans-serif;font-size:14px}
+.wrap{max-width:1500px;margin:0 auto;padding:0 0 40px}
+.top{display:flex;align-items:center;gap:16px;padding:14px 20px;border-bottom:1px solid var(--line)}
+.logo{width:36px;height:36px;border-radius:9px;background:linear-gradient(135deg,#f3d27a,#b8860b);display:grid;place-items:center;color:#2a1c00;font-weight:900}
+h1{font-size:20px;margin:0;font-weight:800;letter-spacing:-.2px}
+.sub{margin-left:auto;color:var(--mut);font-size:13px;letter-spacing:.3px}
+.cards{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;padding:16px 20px 4px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.card small{display:block;color:var(--mut);font-size:11px;letter-spacing:.8px;text-transform:uppercase;font-weight:700}
+.card b{display:block;font-size:20px;margin-top:4px}
+.tools{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:12px 20px;color:var(--mut);font-size:13px}
+.tools label{display:flex;align-items:center;gap:6px}
+.tools input[type=number]{width:64px}
+button{background:var(--panel);color:var(--txt);border:1px solid var(--line);border-radius:8px;padding:7px 12px;cursor:pointer;font-size:13px}
+button:hover{border-color:var(--gold)}
+.tw{margin:0 20px;border:1px solid var(--line);border-radius:12px;overflow:auto;background:var(--panel)}
+table{width:100%;border-collapse:collapse;min-width:1380px}
+thead th{background:var(--head);color:var(--mut);font-size:12px;letter-spacing:1px;text-transform:uppercase;font-weight:800;padding:14px 12px;text-align:right;white-space:nowrap;position:sticky;top:0}
+thead th.l{text-align:left}
+tbody td{padding:13px 12px;border-top:1px solid var(--line);text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+tbody td.l{text-align:left}
+tbody tr:hover{background:#0e162a}
+.placa{font-weight:800;letter-spacing:.3px}
+.mot{font-weight:800}
+.cfg{color:var(--mut)}
+.c-km{color:var(--teal)} .c-fat{color:var(--txt)} .c-comb{color:var(--red)} .c-com{color:var(--blue)} .c-man{color:var(--yel)}
+th.c-km{color:var(--teal)} th.c-comb{color:var(--red)} th.c-com{color:var(--blue)} th.c-man{color:var(--yel)} th.c-res{color:var(--grn)}
+.pos{color:var(--grn);font-weight:800} .neg{color:var(--red);font-weight:800} .na{color:#3a4561}
+.manut-km{color:var(--blue)}
+.c-fin{color:#b794f6} th.c-fin{color:#b794f6}
+input.cell{background:transparent;border:0;border-bottom:1px dashed #2a3552;color:inherit;font:inherit;text-align:right;width:110px;padding:2px 0;outline:0}
+input.cell:focus{border-bottom-color:var(--gold)}
+input.cell::placeholder{color:#3a4561}
+select.cfgsel{background:transparent;border:0;color:var(--mut);font:inherit}
+th[data-sort]{cursor:pointer;user-select:none}
+th[data-sort]:hover{color:var(--gold)}
+th[data-sort]::after{content:"↕";opacity:.3;margin-left:6px;font-size:10px}
+th.asc::after{content:"▲";opacity:1;color:var(--gold)}
+th.desc::after{content:"▼";opacity:1;color:var(--gold)}
+th.asc,th.desc{color:var(--gold)!important}
+.warn{cursor:help;margin-left:6px;color:var(--yel)}
+.info{cursor:help;margin-left:6px;color:var(--blue)}
+.banner{margin:12px 20px 0;padding:10px 14px;border:1px solid #3a2f12;background:#17130a;color:var(--yel);border-radius:10px;font-size:13px;line-height:1.55}
+.banner:empty{display:none}
+tfoot td{padding:14px 12px;border-top:2px solid var(--line);text-align:right;font-weight:800;background:var(--head);font-variant-numeric:tabular-nums}
+tfoot td.l{text-align:left}
+.notes{margin:16px 20px 0;color:var(--mut);font-size:12.5px;line-height:1.6}
+.notes b{color:var(--txt)}
+@media(max-width:900px){.cards{grid-template-columns:repeat(2,1fr)}.sub{display:none}}
+@media print{.tools{display:none}body{background:#fff;color:#000}}
+
+.hm{margin:18px 20px 0;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 16px 14px}
+.hm-h{display:flex;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:12px}
+.hm-h h2{margin:0;font-size:15px;font-weight:800;letter-spacing:-.1px}
+.hm-h p{margin:2px 0 0;color:var(--mut);font-size:12px}
+.hm-leg{margin-left:auto;display:flex;align-items:center;gap:8px;color:var(--mut);font-size:11px}
+.hm-leg i{display:block;width:180px;height:9px;border-radius:5px;background:linear-gradient(90deg,rgba(251,90,110,.85),rgba(251,90,110,.12) 38%,rgba(107,119,148,.10) 50%,rgba(45,212,191,.12) 62%,rgba(45,212,191,.85))}
+.hm-w{overflow:auto}
+.hm-t{border-collapse:separate;border-spacing:3px;min-width:900px;width:100%}
+.hm-t th{font-size:10.5px;letter-spacing:.6px;text-transform:uppercase;color:var(--mut);font-weight:700;padding:2px 4px 6px;text-align:center;white-space:nowrap;position:static;cursor:default;background:none;border:0}
+.hm-t th small{display:block;font-size:9.5px;letter-spacing:.2px;text-transform:none;font-weight:500;opacity:.8}
+.hm-t td.pl{font-weight:800;font-size:13px;padding:0 10px 0 2px;white-space:nowrap;text-align:left;border:0;background:none}
+.hm-t td.pl span{display:block;color:var(--mut);font-weight:500;font-size:10.5px}
+.hm-t td.hc{height:38px;min-width:96px;text-align:center;font-size:12.5px;font-weight:700;border-radius:6px;border:0;font-variant-numeric:tabular-nums;color:var(--txt);padding:0 6px}
+.hm-t td.hc.na{background:rgba(107,119,148,.06);color:var(--mut);font-weight:400}
+.hm-f{margin-top:10px;color:var(--mut);font-size:11px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div class="logo">≡</div>
+    <h1>Tabela de Resultado por Veículo <span style="color:var(--mut);font-weight:600;font-size:14px">· BX · Setembro/2026</span></h1>
+    <div class="sub" id="subSort">Ordenado por resultado decrescente</div>
+  </div>
+
+  <div class="cards" id="cards"></div>
+
+  <div class="banner" id="banner"></div>
+
+  <div class="tools">
+    <label>Comissão motorista (% do faturamento, tratada como custo):
+      <input type="number" id="rate" min="0" max="100" step="0.5" value="10"> %</label>
+    <label style="cursor:pointer;color:var(--txt)"><input type="checkbox" id="useFin"> Considerar financiamento no resultado</label>
+    <button id="btnCsv">Exportar CSV</button>
+    <button id="btnReset">Restaurar valores originais</button>
+    <span>Preencha <b style="color:var(--txt)">Faturamento</b> e <b style="color:var(--txt)">Manut/mês</b> nas células pontilhadas — tudo é recalculado e salvo no navegador.</span>
+  </div>
+
+  <div class="tw">
+    <table>
+      <thead><tr>
+        <th class="l" data-sort="placa">Placa</th><th class="l" data-sort="mot">Motorista</th><th class="l" data-sort="cfg">Config.</th>
+        <th class="c-km" data-sort="km">KM Rodados</th><th data-sort="fat">Faturamento</th><th class="c-comb" data-sort="comb">Combustível</th>
+        <th class="c-com" id="thCom" data-sort="com">Comissão (10%)</th><th class="c-man" data-sort="man">Manut/Mês</th><th class="c-fin" data-sort="fin">Financiamento</th>
+        <th class="c-res" data-sort="res">Resultado</th><th data-sort="pct">% Lucr.</th><th data-sort="kml">KM/L</th><th class="c-com" data-sort="mkm">Manut/KM</th><th class="c-res" data-sort="lkm">Lucro/KM</th>
+      </tr></thead>
+      <tbody id="rows"></tbody>
+      <tfoot id="foot"></tfoot>
+    </table>
+  </div>
+
+  <div class="hm" id="hm"></div>
+
+  <div class="notes">
+    <b>Premissas:</b> Combustível = valor <i>líquido</i> (após descontos) dos relatórios “Gerenciador de Média” de 01/09 a 30/09/2026. KM rodados = KM final − KM anterior do relatório. KM/L = KM rodados ÷ litros abastecidos.
+    Resultado = Faturamento − Combustível − Comissão − Manutenção − Financiamento (o financiamento só é deduzido com a opção “Considerar financiamento no resultado” marcada). % Lucr. = Resultado ÷ Faturamento. Manut/KM e Lucro/KM sobre os KM rodados.
+    <b>Manutenção:</b> soma, por placa, dos 6 relatórios de despesas de setembro/2026 (vencimento 01–30/09, baixados): Peças (R$ 99.436,90), Mão-de-obra (R$ 79.107,94), Aquisição de pneus (R$ 39.989,76), Recapagem/Pneu (R$ 29.099,47), Manutenção Volvo (R$ 13.769,23) e Lava-jato (R$ 550,00), total R$ 261.953,30. Despesas com placa definida atribuídas diretamente (R$ 113.863,14); despesas sem placa definida (R$ 91.486,54, 58 títulos) somadas e rateadas igualmente entre as 17 placas (cota de R$ 5.381,56 por veículo). Reembolsos de borracharia de motoristas foram atribuídos à placa do motorista. Ficaram de fora R$ 56.603,62 de placas não incluídas no modelo (ex.: RAT0H32, QCH4258, RRR1I70, QCN5I07). Regime de caixa (por vencimento). <b>Faturamento:</b> faturamento bruto de setembro/2026 (planilha SETEMBRO_26, 1ª + 2ª quinzena). A planilha é por motorista; onde o motorista rodou em mais de uma placa (Gilson, Romildo, Iago, Vinicius) o valor foi rateado por quinzena, cruzando com datas e motoristas dos abastecimentos. Confirmar o rateio. Valores editáveis. <b>Financiamento:</b> valor por placa conforme planilha enviada; deduzido do Resultado, % Lucr. e Lucro/KM quando a opção estiver marcada.
+  </div>
+</div>
+
+<script>
+// Dados extraídos dos relatórios de abastecimento (set/2026). comb = valor líquido (R$).
+const MQ=5381.5612, MQT=91486.54, MC=["Peças", "Mão de obra", "Aquisição de pneus", "Recapagem", "Volvo", "Lava-jato"];
+const V = [
+ {placa:"SER8B89",man:7538.62,mc:2,md:2157.06,mb:[0, 0, 0, 1092.0, 1065.06, 0],fin:23721.41,fat:53231.62,mot:"ALANDEON",cfg:"6X4",km:7785,l:3458.27,comb:22451.35},
+ {placa:"SEB0C73",man:16467.77,mc:16,md:11086.21,mb:[6233.71, 2699.04, 975.0, 234.5, 943.96, 0],fin:7771.67,fat:90610.55,mot:"EGUIMAR",cfg:"6X2",km:10746,l:5088.95,comb:33970.95,w:"Desconto de R$ 575,73 já abatido (líquido)."},
+ {placa:"EVQ4G36",man:11474.74,mc:10,md:6093.18,mb:[160.0, 0, 2540.0, 2479.25, 913.93, 0],mn:"Inclui reembolso de borracharia do Genivaldo (R$ 100,00).",fin:8101.19,fat:109276.68,mot:"GENIVALDO",cfg:"6X2",km:10738,l:5704.39,comb:37703.68},
+ {placa:"FAG6C74",man:9889.41,mc:4,md:4507.85,mb:[265.0, 0, 1346.0, 1998.65, 898.2, 0],fin:27880.84,fat:68903.28,mot:"PEDRO HENRIQUE",cfg:"6X2",km:8671,l:4341.35,comb:28847.78,w:"Abastecimentos de 08 e 09/09 com média incoerente (25,45 e 0,04 km/l) — provável erro de odômetro; o total do mês fecha."},
+ {placa:"SED9E99",man:11387.38,mc:8,md:6005.82,mb:[60.0, 0, 1998.67, 1614.41, 2332.74, 0],fin:20017.12,fat:51987.38,mot:"OTAVIO",cfg:"6X2",km:6043,l:3071.44,comb:20279.60},
+ {placa:"SPG8H44",man:11604.82,mc:10,md:6223.26,mb:[4084.43, 0, 940.0, 1198.83, 0, 0],mn:"Inclui título “SPG” (R$ 1.584,40) e 50% do título “SPG/RAR” (R$ 940,00).",fin:31796.9,fat:54678.93,mot:"LUCAS",cfg:"6X2",km:5709,l:2789.74,comb:18381.91},
+ {placa:"OAW3H43",man:8594.32,mc:4,md:3212.76,mb:[824.0, 1022.76, 996.0, 370.0, 0, 0],mn:"Inclui reembolso de borracharia do Lindomar Godoy (R$ 370,00) e para-brisa (R$ 824,00).",fat:49066.19,mot:"LINDOMAR GODOY",cfg:"6X4",km:4994,l:2255.77,comb:14823.50},
+ {placa:"RAW9C35",man:16182.78,mc:16,md:10801.22,mb:[2914.88, 1890.0, 3254.0, 1607.91, 934.43, 200.0],mn:"Inclui reembolso de borracharia do Gilson (16/09, R$ 120,00) e “lava jato RAW” (R$ 200,00).",fin:16604.34,fat:32745.0,fn:"Rateio: Gilson 2ªQNZ (R$ 32.745,00). Planilha traz o total do motorista em 2 placas; atribuído por quinzena conforme os abastecimentos (Gilson na RAW9C35 de 21 a 29/09).",mot:"GILSON",cfg:"6X2",km:3147,l:1463.74,comb:8376.91,w:"Só 3 abastecimentos (a partir de 21/09) e preço unitário de R$ 4,17 no primeiro (padrão do período ≈ R$ 6,79). Possível falta de lançamentos."},
+ {placa:"SEF7G88",man:18634.42,mc:17,md:13252.86,mb:[7460.22, 90.0, 3252.95, 1500.0, 949.69, 0],mn:"Inclui reembolsos de borracharia do Willes (R$ 240,00).",fin:8270.0,fat:52532.28,mot:"WILLES",cfg:"6X4",km:6913,l:3576.77,comb:23571.85,w:"Abastecimento de 10/09 (770 L) com média de 0,54 km/l — possível erro de lançamento. Desconto de R$ 180,36 já abatido."},
+ {placa:"RXP0A12",man:11706.67,mc:10,md:6325.11,mb:[1217.14, 838.5, 1832.0, 1557.0, 880.47, 0],fin:17781.12,fat:61288.0,mot:"MANOEL",cfg:"6X2",km:6597,l:2948.98,comb:19188.57},
+ {placa:"QWE9A32",man:9921.42,mc:5,md:4539.86,mb:[1079.55, 0, 1892.0, 652.0, 916.31, 0],fin:6489.52,fat:51226.55,mot:"LINDOMAR FRANCISCO",cfg:"6X4",km:6289,l:3031.38,comb:19778.50,w:"Desconto de R$ 286,23 já abatido (líquido). Abastecimento de 10/09 com média 0,01 km/l."},
+ {placa:"RXW2G64",man:10032.95,mc:8,md:4651.39,mb:[883.19, 2640.0, 0, 230.0, 898.2, 0],mn:"Inclui título Volvo com histórico “RXW” (R$ 898,20).",fin:16236.42,fat:50400.45,mot:"ANTONIO BISPO",cfg:"6X2",km:5547,l:2648.08,comb:17245.25},
+ {placa:"RAQ1D79",man:12961.63,mc:8,md:7580.07,mb:[4029.82, 0, 1950.0, 1600.25, 0, 0],mn:"Inclui reembolso de borracharia do Elisnei (R$ 50,00).",fat:49290.36,mot:"ELISNEI",cfg:"6X2",km:5838,l:2827.42,comb:18777.58},
+ {placa:"FFL2G91",man:11664.91,mc:7,md:6283.35,mb:[998.95, 0, 3997.34, 60.0, 1227.06, 0],mn:"Inclui título Volvo com histórico “FFL” (R$ 1.227,06).",fin:23638.6,fat:93042.05,mot:"DAFHNIS",cfg:"6X4",km:10602,l:5008.10,comb:33035.39},
+ {placa:"FAF4J74",man:11720.4,mc:8,md:6338.84,mb:[1506.47, 0, 2912.4, 1039.5, 880.47, 0],mn:"Inclui reembolso de borracharia do Gilson (10/09, R$ 340,00), título Volvo “FAF” (R$ 880,47) e título “FAFAJ74” (R$ 180,00).",fat:42083.5,fn:"Rateio: Gilson 1ªQNZ (R$ 22.088,50) + Romildo 2ªQNZ (R$ 19.995,00). Gilson abasteceu a placa de 01 a 08/09 e Romildo de 22 a 29/09.",mot:"GILSON / ROMILDO",cfg:"6X2",km:5832,l:2552.30,comb:16685.72,w:"Dois motoristas no período. Abastecimento de 03/09 (120 L) com média 0,00."},
+ {placa:"RAR7F60",man:14134.79,mc:18,md:8753.23,mb:[1293.18, 2410.0, 2515.0, 1606.34, 928.71, 0],mn:"Inclui 50% do título “SPG/RAR” (R$ 940,00) e reembolsos de borracharia (Vinicius R$ 165,00 e “BORRACHARIA RAR” R$ 60,00).",fat:22088.5,fn:"Rateio: Vinicius 1ªQNZ (R$ 22.088,50). Iago só aparece em 1 abastecimento (29/09); seu faturamento foi todo atribuído à RAU0H20.",mot:"VINICIUS",cfg:"6X2",km:2401,l:664.04,comb:4290.16,w:"Apenas 3 abastecimentos e 2 motoristas; 3,62 km/l é atípico — provável falta de lançamentos de combustível."},
+ {placa:"RAU0H20",man:11432.63,mc:9,md:6051.07,mb:[1315.84, 3445.23, 830.0, 460.0, 0, 0],mn:"Inclui reembolso de borracharia do Iago (R$ 250,00) e título “RAUOH20” (R$ 789,17).",fin:15850.61,fat:50322.57,fn:"Faturamento total do Iago (R$ 50.322,57) atribuído a esta placa; na planilha ele consta em RAU0H20 / RAR7F60 sem divisão.",mot:"IAGO",cfg:"",km:4860,l:2163.65,comb:14086.23,w:"Placa não consta no layout de referência — confirmar configuração (6X2/6X4)."}
+];
+
+const KEY="bx_resultado_2026_09";
+let S={fat:{},man:{},fin:{},cfg:{},rate:10,useFin:true,sort:{k:"res",d:"desc"}};
+try{const r=JSON.parse(localStorage.getItem(KEY));if(r)S=Object.assign(S,r)}catch(e){}
+S.sort={k:"res",d:"desc"};
+try{const q=JSON.parse(localStorage.getItem(KEY+"_sort"));if(q&&q.k)S.sort=q}catch(e){}
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
+
+const nf0=new Intl.NumberFormat("pt-BR",{maximumFractionDigits:0});
+const nf2=new Intl.NumberFormat("pt-BR",{minimumFractionDigits:2,maximumFractionDigits:2});
+const brl=v=>(v<0?"R$ -":"R$ ")+nf0.format(Math.abs(v));
+const brl2=v=>(v<0?"R$ -":"R$ ")+nf2.format(Math.abs(v));
+function parse(s){
+  s=String(s).replace(/R\$|\s/g,"");
+  if(!s)return null;
+  if(s.includes(","))s=s.replace(/\./g,"").replace(",",".");
+  else if(/^\d{1,3}(\.\d{3})+$/.test(s))s=s.replace(/\./g,"");
+  const n=parseFloat(s);return isNaN(n)?null:n;
+}
+const cls=v=>v>=0?"pos":"neg";
+
+function calc(v){
+  const fat=S.fat[v.placa]??v.fat??null, man=S.man[v.placa]??v.man??null, fin=S.fin[v.placa]??v.fin??null;
+  const r=S.rate/100;
+  const com=fat!=null?fat*r:null;
+  const res=(fat!=null&&v.comb!=null)?fat-v.comb-com-(man||0)-(S.useFin!==false?(fin||0):0):null;
+  return {fat,man,fin,com,res,
+    pct:res!=null&&fat?res/fat*100:null,
+    kml:v.km&&v.l?v.km/v.l:null,
+    mkm:man!=null&&v.km?man/v.km:null,
+    lkm:res!=null&&v.km?res/v.km:null};
+}
+
+function render(keepFocus){
+  document.getElementById("thCom").textContent=`Comissão (${S.rate}%)`;
+  const rows=V.map(v=>({v,c:calc(v)}));
+  const sv=(r,k)=>{const c=r.c,v=r.v;
+    const m={placa:v.placa,mot:v.mot,cfg:S.cfg[v.placa]??v.cfg,km:v.km,fat:c.fat,comb:v.comb,com:c.com,man:c.man,fin:c.fin,res:c.res,pct:c.pct,kml:c.kml,mkm:c.mkm,lkm:c.lkm};
+    const x=m[k]; return (x===""||x===undefined)?null:x;};
+  rows.sort((a,b)=>{
+    const x=sv(a,S.sort.k),y=sv(b,S.sort.k);
+    if(x==null&&y==null)return a.v.placa.localeCompare(b.v.placa);
+    if(x==null)return 1; if(y==null)return -1;
+    const r=typeof x==="string"?x.localeCompare(y,"pt-BR"):x-y;
+    return (S.sort.d==="asc"?r:-r)||a.v.placa.localeCompare(b.v.placa);
+  });
+  document.querySelectorAll("th[data-sort]").forEach(th=>{
+    th.classList.toggle("asc",th.dataset.sort===S.sort.k&&S.sort.d==="asc");
+    th.classList.toggle("desc",th.dataset.sort===S.sort.k&&S.sort.d==="desc");});
+  const LBL={placa:"placa",mot:"motorista",cfg:"configuração",km:"KM rodados",fat:"faturamento",comb:"combustível",com:"comissão",man:"manutenção",fin:"financiamento",res:"resultado",pct:"% lucratividade",kml:"KM/L",mkm:"manutenção/KM",lkm:"lucro/KM"};
+  document.getElementById("subSort").textContent="Ordenado por "+LBL[S.sort.k]+(S.sort.d==="asc"?" crescente":" decrescente");
+  const tb=document.getElementById("rows");
+  tb.innerHTML=rows.map(({v,c})=>{
+    const cfg=S.cfg[v.placa]??v.cfg;
+    const dash='<span class="na">—</span>';
+    return `<tr>
+      <td class="l placa"${(v.w||v.fn)?` title="${[v.w,v.fn].filter(Boolean).join(" • ").replace(/"/g,'&quot;')}"`:""}>${v.placa}</td>
+      <td class="l mot">${v.mot||dash}</td>
+      <td class="l cfg"><select class="cfgsel" data-p="${v.placa}"><option value=""${cfg===""?" selected":""}>—</option><option${cfg==="6X2"?" selected":""}>6X2</option><option${cfg==="6X4"?" selected":""}>6X4</option></select></td>
+      <td class="c-km">${v.km!=null?nf0.format(v.km):dash}</td>
+      <td class="c-fat"><input class="cell" data-k="fat" data-p="${v.placa}" placeholder="R$ 0" value="${c.fat!=null?nf0.format(c.fat):""}"></td>
+      <td class="c-comb">${v.comb!=null?brl(v.comb):dash}</td>
+      <td class="c-com">${c.com!=null?brl(c.com):dash}</td>
+      <td class="c-man" title="${v.mc?"Direto na placa R$ "+nf2.format(v.md)+" ("+MC.map((c,i)=>v.mb[i]?c+" "+nf2.format(v.mb[i]):"").filter(Boolean).join(" · ")+") + cota das despesas sem placa R$ "+nf2.format(MQ)+" (R$ "+nf2.format(MQT)+" ÷ 17)"+(v.mn?" — "+v.mn:""):""}"><input class="cell" data-k="man" data-p="${v.placa}" placeholder="R$ 0" value="${c.man!=null?nf0.format(c.man):""}"></td>
+      <td class="c-fin"><input class="cell" data-k="fin" data-p="${v.placa}" placeholder="R$ 0" value="${c.fin!=null?nf0.format(c.fin):""}"></td>
+      <td class="${c.res!=null?cls(c.res):"na"}">${c.res!=null?brl(c.res):"—"}</td>
+      <td class="${c.pct!=null?cls(c.pct):"na"}">${c.pct!=null?nf2.format(c.pct).replace(/,(\d)\d$/,",$1")+"%":"—"}</td>
+      <td>${c.kml!=null?nf2.format(c.kml):dash}</td>
+      <td class="manut-km">${c.mkm!=null?brl2(c.mkm)+"/km":dash}</td>
+      <td class="${c.lkm!=null?cls(c.lkm):"na"}">${c.lkm!=null?brl2(c.lkm)+"/km":"—"}</td>
+    </tr>`;}).join("");
+
+  // Totais
+  const withFuel=V.filter(v=>v.comb!=null);
+  const km=withFuel.reduce((a,v)=>a+v.km,0), lit=withFuel.reduce((a,v)=>a+v.l,0), comb=withFuel.reduce((a,v)=>a+v.comb,0);
+  const full=rows.filter(r=>r.c.res!=null);               // veículos com faturamento e combustível
+  const fat=full.reduce((a,r)=>a+r.c.fat,0), com=full.reduce((a,r)=>a+r.c.com,0),
+        man=rows.reduce((a,r)=>a+(r.c.man||0),0), res=full.reduce((a,r)=>a+r.c.res,0),
+        kmF=full.reduce((a,r)=>a+r.v.km,0), combF=full.reduce((a,r)=>a+r.v.comb,0);
+  const have=full.length>0;
+  const finT=rows.reduce((a,r)=>a+(r.c.fin||0),0);
+  document.getElementById("foot").innerHTML=`<tr>
+    <td class="l" colspan="3">TOTAL (${have?full.length+" de "+V.length+" com faturamento":withFuel.length+" veículos c/ combustível"})</td>
+    <td class="c-km">${nf0.format(km)}</td>
+    <td>${have?brl(fat):"—"}</td><td class="c-comb">${brl(comb)}</td>
+    <td class="c-com">${have?brl(com):"—"}</td><td class="c-man">${man?brl(man):"—"}</td><td class="c-fin">${finT?brl(finT):"—"}</td>
+    <td class="${have?cls(res):"na"}">${have?brl(res):"—"}</td>
+    <td class="${have?cls(res):"na"}">${have&&fat?nf2.format(res/fat*100).replace(/,(\d)\d$/,",$1")+"%":"—"}</td>
+    <td>${nf2.format(km/lit)}</td><td class="manut-km">${man&&kmF?brl2(man/kmF)+"/km":"—"}</td>
+    <td class="${have?cls(res):"na"}">${have&&kmF?brl2(res/kmF)+"/km":"—"}</td></tr>`;
+
+  document.getElementById("cards").innerHTML=[
+    ["Faturamento",have?brl(fat):"—",""],
+    ["Combustível (frota)",brl(comb),"c-comb"],
+    ["Comissão",have?brl(com):"—","c-com"],
+    ["Manutenção",man?brl(man):"—","c-man"],
+    ["Resultado",have?brl(res):"—",have?cls(res):""],
+    ["Custo comb./KM",brl2(comb/km)+"/km","c-km"]
+  ].map(([t,v,k])=>`<div class="card"><small>${t}</small><b class="${k}">${v}</b></div>`).join("");
+
+  const faltaMan=V.filter(v=>v.comb!=null&&(S.man[v.placa]??v.man)==null).length;
+  const orf=V.filter(v=>(S.fat[v.placa]??v.fat)!=null&&v.comb==null);
+  let b="";
+  if(faltaMan) b+=`Manutenção ainda não informada em ${faltaMan} veículo(s): Resultado, % Lucr. e Lucro/KM estão <b>parciais</b> (sem o custo de manutenção).<br>`;
+  if(orf.length) b+=`Faturamento sem combustível lançado: ${orf.map(v=>v.placa+" ("+brl(S.fat[v.placa]??v.fat)+")").join(", ")} — fora dos totais e do resultado.`;
+  document.getElementById("banner").innerHTML=b;
+  renderHeat(rows);
+  bind();
+}
+
+
+function renderHeat(rows){
+  const M=[
+    {k:"res",t:"Resultado",s:"R$",f:(c,v)=>c.res,fmt:x=>brl(x),z:1},
+    {k:"pct",t:"% Lucr.",s:"s/ faturamento",f:(c,v)=>c.pct,fmt:x=>nf2.format(x).replace(/,(\d)\d$/,",$1")+"%",z:1},
+    {k:"lkm",t:"Lucro/KM",s:"R$/km",f:(c,v)=>c.lkm,fmt:x=>brl2(x),z:1},
+    {k:"fat",t:"Faturamento",s:"R$",f:(c,v)=>c.fat,fmt:x=>brl(x),z:0},
+    {k:"kml",t:"KM/L",s:"eficiência",f:(c,v)=>c.kml,fmt:x=>nf2.format(x),z:0},
+    {k:"ckm",t:"Comb./KM",s:"R$/km · menor = melhor",f:(c,v)=>(v.comb!=null&&v.km?v.comb/v.km:null),fmt:x=>brl2(x),z:0,inv:1},
+    {k:"mkm",t:"Manut./KM",s:"R$/km · menor = melhor",f:(c,v)=>c.mkm,fmt:x=>brl2(x),z:0,inv:1},
+    {k:"fkm",t:"Fat./KM",s:"R$/km",f:(c,v)=>(c.fat!=null&&v.km?c.fat/v.km:null),fmt:x=>brl2(x),z:0}
+  ];
+  const st=M.map(m=>{const a=rows.map(r=>m.f(r.c,r.v)).filter(x=>x!=null&&isFinite(x));
+    return {mn:Math.min(...a),mx:Math.max(...a)};});
+  const score=(m,i,x)=>{const {mn,mx}=st[i]; let s;
+    if(m.z){s=x>=0?(mx>0?x/mx:0):(mn<0?-(x/mn):0);}
+    else s=mx>mn?((x-mn)/(mx-mn))*2-1:0;
+    return m.inv?-s:s;};
+  const col=s=>{const a=Math.min(1,Math.abs(s)),al=(0.10+a*0.78).toFixed(2);
+    return s>=0?`rgba(45,212,191,${al})`:`rgba(251,90,110,${al})`;};
+  const head=M.map(m=>`<th>${m.t}<small>${m.s}</small></th>`).join("");
+  const body=rows.map(({v,c})=>`<tr><td class="pl">${v.placa}<span>${v.mot||"—"}</span></td>`+
+    M.map((m,i)=>{const x=m.f(c,v);
+      if(x==null||!isFinite(x))return `<td class="hc na">—</td>`;
+      const sc=score(m,i,x);
+      return `<td class="hc" style="background:${col(sc)}" title="${v.placa} · ${m.t}: ${m.fmt(x)}">${m.fmt(x)}</td>`;}).join("")+`</tr>`).join("");
+  document.getElementById("hm").innerHTML=`<div class="hm-h"><div><h2>Mapa de calor · desempenho por veículo</h2><p>Cada coluna é colorida pela sua própria escala: verde = melhor desempenho da frota, vermelho = pior. Linhas seguem a ordenação da tabela.</p></div>
+    <div class="hm-leg"><span>pior</span><i></i><span>melhor</span></div></div>
+    <div class="hm-w"><table class="hm-t"><thead><tr><th></th>${head}</tr></thead><tbody>${body}</tbody></table></div>
+    <div class="hm-f">Resultado, % Lucr. e Lucro/KM: negativo em vermelho, positivo em verde (escala em torno de zero). Demais colunas: escala mín–máx da frota; em Comb./KM e Manut./KM, menor custo = verde.</div>`;
+}
+
+function bind(){
+  document.querySelectorAll("input.cell").forEach(i=>{
+    i.addEventListener("change",()=>{
+      const n=parse(i.value), m=S[i.dataset.k];
+      if(n==null)delete m[i.dataset.p]; else m[i.dataset.p]=n;
+      save();render();
+    });
+  });
+  document.querySelectorAll("select.cfgsel").forEach(s=>{
+    s.addEventListener("change",()=>{S.cfg[s.dataset.p]=s.value;save();});
+  });
+}
+
+document.querySelectorAll("th[data-sort]").forEach(th=>{
+  th.tabIndex=0; th.title="Clique para ordenar";
+  const go=()=>{const k=th.dataset.sort;
+    if(S.sort.k===k) S.sort.d=S.sort.d==="asc"?"desc":"asc";
+    else S.sort={k,d:["placa","mot","cfg"].includes(k)?"asc":"desc"};
+    save();try{localStorage.setItem(KEY+"_sort",JSON.stringify(S.sort))}catch(e){}render();};
+  th.addEventListener("click",go);
+  th.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();go();}});
+});
+document.getElementById("rate").value=S.rate;
+const chk=document.getElementById("useFin");chk.checked=S.useFin!==false;
+chk.addEventListener("change",()=>{S.useFin=chk.checked;save();render();});
+document.getElementById("rate").addEventListener("change",e=>{S.rate=parseFloat(e.target.value)||0;save();render();});
+document.getElementById("btnReset").onclick=()=>{if(confirm("Restaurar faturamento, financiamento e manutenção aos valores originais?")){S.fat={};S.man={};S.fin={};save();render();}};
+document.getElementById("btnCsv").onclick=()=>{
+  const h=["Placa","Motorista","Config","KM","Litros","KM/L","Faturamento","Combustivel","Comissao","Manutencao","Financiamento","Resultado","%Lucr","Manut/KM","Lucro/KM"];
+  const L=[h.join(";")];
+  V.forEach(v=>{const c=calc(v);const f=x=>x==null?"":String(Math.round(x*100)/100).replace(".",",");
+    L.push([v.placa,v.mot,S.cfg[v.placa]??v.cfg,f(v.km),f(v.l),f(c.kml),f(c.fat),f(v.comb),f(c.com),f(c.man),f(c.fin),f(c.res),f(c.pct),f(c.mkm),f(c.lkm)].join(";"));});
+  const b=new Blob(["\ufeff"+L.join("\n")],{type:"text/csv;charset=utf-8"});
+  const a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="bx_resultado_veiculos_2026-09.csv";a.click();
+};
+render();
+</script>
+</body>
+</html>
