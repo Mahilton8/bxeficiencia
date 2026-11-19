@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BX · Resultado por Veículo</title>
+<style>
+:root{
+  --bg:#070b14; --panel:#0b1120; --line:#151d30; --head:#0d1426;
+  --txt:#e8ecf5; --mut:#6b7794; --gold:#e8b94a; --gold2:#b8860b;
+  --teal:#2dd4bf; --red:#fb5a6e; --blue:#4da3ff; --yel:#fbbf24; --grn:#34d399;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--txt);font-family:-apple-system,"Segoe UI",Inter,Roboto,Arial,sans-serif;font-size:14px}
+.wrap{max-width:1800px;margin:0 auto;padding:0 0 40px}
+.top{display:flex;align-items:center;gap:16px;padding:14px 20px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.logo{width:36px;height:36px;border-radius:9px;background:linear-gradient(135deg,#f3d27a,#b8860b);display:grid;place-items:center;color:#2a1c00;font-weight:900}
+h1{font-size:20px;margin:0;font-weight:800;letter-spacing:-.2px}
+.msel{display:flex;align-items:center;gap:8px;color:var(--mut);font-size:12px;letter-spacing:.8px;text-transform:uppercase;font-weight:700}
+.msel select{background:var(--panel);color:var(--txt);border:1px solid var(--line);border-radius:8px;padding:7px 10px;font:600 13px inherit;font-family:inherit;letter-spacing:0;text-transform:none;cursor:pointer}
+.msel select:hover,.msel select:focus{border-color:var(--gold);outline:0}
+.sub{margin-left:auto;color:var(--mut);font-size:13px;letter-spacing:.3px}
+.tabs{display:flex;gap:6px;padding:12px 20px 0;border-bottom:1px solid var(--line)}
+.tabs button{background:none;border:0;border-bottom:3px solid transparent;border-radius:0;color:var(--mut);padding:10px 16px;font-size:14px;font-weight:800;letter-spacing:.3px;cursor:pointer}
+.tabs button:hover{color:var(--txt)}
+.tabs button.on{color:var(--gold);border-bottom-color:var(--gold)}
+.view{display:none}.view.on{display:block}
+.cards{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;padding:16px 20px 4px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.card small{display:block;color:var(--mut);font-size:11px;letter-spacing:.8px;text-transform:uppercase;font-weight:700}
+.card b{display:block;font-size:20px;margin-top:4px}
+.banner{margin:12px 20px 0;padding:12px 16px;border-radius:10px;background:#1a1405;border:1px solid #4a3a10;color:var(--yel);font-size:13px}
+.banner:empty{display:none}
+.tools{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:12px 20px;color:var(--mut);font-size:13px}
+.tools label{display:flex;align-items:center;gap:6px}
+.tools input[type=number]{width:64px}
+.hint{padding:0 20px 10px;color:var(--mut);font-size:12.5px}
+.hint b{color:var(--txt)}
+button{background:var(--panel);color:var(--txt);border:1px solid var(--line);border-radius:8px;padding:7px 12px;cursor:pointer;font-size:13px;font-family:inherit}
+button:hover{border-color:var(--gold)}
+.tw{margin:0 20px;border:1px solid var(--line);border-radius:12px;overflow:auto;background:var(--panel)}
+table{width:100%;border-collapse:collapse;min-width:0}
+thead th{background:var(--head);color:var(--mut);font-size:12px;letter-spacing:.5px;text-transform:uppercase;font-weight:800;padding:14px 8px;text-align:right;white-space:nowrap;position:sticky;top:0;cursor:pointer;user-select:none}
+thead th.l{text-align:left}
+thead th:hover{color:var(--txt)}
+thead th .ar{font-size:10px;margin-left:4px;opacity:.35}
+thead th.act .ar{opacity:1;color:var(--gold)}
+tbody td{padding:13px 8px;border-top:1px solid var(--line);text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+tbody td.l{text-align:left}
+tbody tr:hover{background:#0e162a}
+.placa{font-weight:800;letter-spacing:.3px}
+.mot{font-weight:800}
+.cfg{color:var(--mut)}
+.c-km{color:var(--teal)} .c-fat{color:var(--txt)} .c-comb{color:var(--red)} .c-com{color:var(--blue)} .c-man{color:var(--yel)}
+.c-fin{color:#b794f6} .c-out{color:#fb923c}
+th.c-km{color:var(--teal)} th.c-comb{color:var(--red)} th.c-com{color:var(--blue)} th.c-man{color:var(--yel)} th.c-res{color:var(--grn)} th.c-fin{color:#b794f6} th.c-out{color:#fb923c}
+.pos{color:var(--grn);font-weight:800} .neg{color:var(--red);font-weight:800} .na{color:#3a4561}
+.manut-km{color:var(--blue)}
+input.cell{background:transparent;border:0;border-bottom:1px dashed #2a3552;color:inherit;font:inherit;text-align:right;width:84px;padding:2px 0;outline:0}
+input.cell:focus{border-bottom-color:var(--gold)}
+input.cell::placeholder{color:#3a4561}
+select.cfgsel{background:transparent;border:0;color:var(--mut);font:inherit}
+.warn{cursor:help;margin-left:6px;color:var(--yel)}
+tfoot td{padding:14px 8px;border-top:2px solid var(--line);text-align:right;font-weight:800;background:var(--head);font-variant-numeric:tabular-nums;white-space:nowrap}
+tfoot td.l{text-align:left}
+.c-out.clk{cursor:pointer;text-decoration:underline dotted;text-underline-offset:4px;text-decoration-color:#fb923c88}
+.c-out.clk:hover{background:#1a1424}
+.hm{margin:18px 20px 0;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 16px 14px}
+.hm-h{display:flex;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:12px}
+.hm-h h2{margin:0;font-size:15px;font-weight:800;letter-spacing:-.1px}
+.hm-h p{margin:2px 0 0;color:var(--mut);font-size:12px}
+.hm-leg{margin-left:auto;display:flex;align-items:center;gap:8px;color:var(--mut);font-size:11px}
+.hm-leg i{display:block;width:180px;height:9px;border-radius:5px;background:linear-gradient(90deg,rgba(251,90,110,.85),rgba(251,90,110,.12) 38%,rgba(107,119,148,.10) 50%,rgba(45,212,191,.12) 62%,rgba(45,212,191,.85))}
+.hm-w{overflow:auto}
+.hm-t{border-collapse:separate;border-spacing:3px;min-width:900px;width:100%}
+.hm-t th{font-size:10.5px;letter-spacing:.6px;text-transform:uppercase;color:var(--mut);font-weight:700;padding:2px 4px 6px;text-align:center;white-space:nowrap;position:static;cursor:default;background:none;border:0}
+.hm-t th small{display:block;font-size:9.5px;letter-spacing:.2px;text-transform:none;font-weight:500;opacity:.8}
+.hm-t td.pl{font-weight:800;font-size:13px;padding:0 10px 0 2px;white-space:nowrap;text-align:left;border:0;background:none}
+.hm-t td.pl span{display:block;color:var(--mut);font-weight:500;font-size:10.5px}
+.hm-t td.hc{height:38px;min-width:96px;text-align:center;font-size:12.5px;font-weight:700;border-radius:6px;border:0;font-variant-numeric:tabular-nums;color:var(--txt);padding:0 6px}
+.hm-t td.hc.na{background:rgba(107,119,148,.06);color:var(--mut);font-weight:400}
+.hm-f{margin-top:10px;color:var(--mut);font-size:11px}
+.notes{margin:16px 20px 0;color:var(--mut);font-size:12.5px;line-height:1.6}
+.notes b{color:var(--txt)}
+/* ---------- Simulador ---------- */
+.sim{padding:16px 20px 0}
+.sim h2{margin:0 0 4px;font-size:16px;font-weight:800}
+.sim .lead{margin:0 0 14px;color:var(--mut);font-size:13px;max-width:900px}
+.sim-in{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px}
+.sim-in label[hidden]{display:none}
+.sim-in label{display:flex;flex-direction:column;gap:6px;color:var(--mut);font-size:11px;letter-spacing:.7px;text-transform:uppercase;font-weight:700}
+.sim-in input,.sim-in select{background:var(--bg);color:var(--txt);border:1px solid var(--line);border-radius:8px;padding:9px 10px;font:700 15px inherit;font-family:inherit;letter-spacing:0;text-transform:none;width:100%}
+.sim-in input:focus,.sim-in select:focus{outline:0;border-color:var(--gold)}
+.sim-in small{font-size:10.5px;font-weight:500;text-transform:none;letter-spacing:0;color:var(--mut)}
+.sim-act{display:flex;gap:10px;margin:10px 0 14px;align-items:center;flex-wrap:wrap;color:var(--mut);font-size:12.5px}
+.sim-cards{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:0 0 12px}
+.sim-cards .card b{font-size:22px}
+.sim-cards .card small.s2{margin-top:4px;text-transform:none;letter-spacing:0;font-weight:500;font-size:11.5px}
+.sim-split{display:grid;grid-template-columns:1.1fr .9fr;gap:12px;margin-bottom:16px}
+.box{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+.box h3{margin:0 0 10px;font-size:12px;letter-spacing:.8px;text-transform:uppercase;color:var(--mut);font-weight:800}
+.box table{min-width:0}
+.box td,.box th{padding:7px 6px;font-size:13px;text-align:right;border-top:1px solid var(--line);white-space:nowrap;position:static;background:none;cursor:default}
+.box th{font-size:11px;color:var(--mut);letter-spacing:.6px;text-transform:uppercase;border-top:0}
+.box td:first-child,.box th:first-child{text-align:left}
+.bar{display:flex;height:22px;border-radius:6px;overflow:hidden;margin:6px 0 8px;background:var(--bg)}
+.bar i{display:block;height:100%}
+.bar-l{display:flex;gap:16px;font-size:12px;color:var(--mut);flex-wrap:wrap}
+.bar-l b{color:var(--txt)}
+.dot{display:inline-block;width:9px;height:9px;border-radius:3px;margin-right:6px}
+.sim-t td input.cell{width:72px}
+.sim-t td input[data-sf]{width:92px}
+.sim-t td{padding:11px 8px}
+.sim-foot{margin:14px 0 0;color:var(--mut);font-size:12.5px;line-height:1.6}
+.sim-foot b{color:var(--txt)}
+/* ---------- Pop-up outras despesas ---------- */
+.md-bg{position:fixed;inset:0;background:rgba(3,6,12,.72);display:none;align-items:center;justify-content:center;z-index:50;padding:20px}
+.md-bg.on{display:flex}
+.md{background:var(--panel);border:1px solid var(--line);border-radius:14px;width:min(880px,100%);max-height:86vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.6)}
+.md-h{display:flex;align-items:flex-start;gap:12px;padding:16px 18px 12px;border-bottom:1px solid var(--line)}
+.md-h h3{margin:0;font-size:16px;font-weight:800}
+.md-h p{margin:3px 0 0;color:var(--mut);font-size:12px}
+.md-x{margin-left:auto;background:none;border:0;color:var(--mut);font-size:22px;line-height:1;cursor:pointer;padding:2px 8px}
+.md-x:hover{color:var(--gold)}
+.md-chips{display:flex;gap:8px;flex-wrap:wrap;padding:12px 18px 4px}
+.md-chip{border:1px solid var(--line);border-radius:999px;padding:4px 10px;font-size:11.5px;color:var(--mut)}
+.md-chip b{color:#fb923c;margin-left:4px}
+.md-b{overflow:auto;padding:6px 18px 4px}
+.md-b table{width:100%;border-collapse:collapse;min-width:0}
+.md-b th{position:sticky;top:0;background:var(--panel);color:var(--mut);font-size:11px;letter-spacing:.8px;text-transform:uppercase;padding:9px 8px;text-align:left;cursor:default;white-space:nowrap}
+.md-b th.r,.md-b td.r{text-align:right}
+.md-b td{text-align:left;padding:8px;border-top:1px solid var(--line);font-size:13px;white-space:normal}
+.md-b td.d{color:var(--mut);white-space:nowrap}
+.md-b td.v{font-weight:700;white-space:nowrap;color:#fb923c}
+.md-f{display:flex;justify-content:space-between;padding:12px 18px;border-top:2px solid var(--line);font-weight:800}
+.md-f span:last-child{color:#fb923c}
+@media(max-width:900px){
+  .cards{grid-template-columns:repeat(2,1fr)}.sub{display:none}
+  .sim-cards{grid-template-columns:repeat(2,1fr)}.sim-split{grid-template-columns:1fr}
+  .top{gap:10px}h1{font-size:17px}
+  .tabs{padding:10px 12px 0}.cards,.tools,.hint,.notes,.sim{padding-left:12px;padding-right:12px}
+  .tw,.hm,.banner{margin-left:12px;margin-right:12px}
+  table{min-width:1500px}.box table{min-width:0}
+}
+@media print{.tools,.tabs,.msel{display:none}body{background:#fff;color:#000}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div class="logo">≡</div>
+    <h1>Resultado por Veículo <span id="mLbl" style="color:var(--mut);font-weight:600;font-size:14px">· BX · Outubro/2026</span></h1>
+    <label class="msel">Mês <select id="month"><option value="2026-10">Outubro/2026</option><option value="2026-09">Setembro/2026</option></select></label>
+    <div class="sub" id="subTxt">Ordenado por resultado decrescente</div>
+  </div>
+  <nav class="tabs"><button class="on" data-tab="sim">Simulador</button><button data-tab="res">Resultado</button></nav>
+
+  <section class="view on" id="view-res">
+    <div class="cards" id="cards"></div>
+    <div class="banner" id="banner"></div>
+    <div class="tools">
+      <label>Comissão motorista (% do faturamento, tratada como custo):
+        <input type="number" id="rate" min="0" max="100" step="0.5" value="10"> %</label>
+      <label><input type="checkbox" id="useFin" checked> Considerar financiamento no resultado</label>
+      <button id="btnCsv">Exportar CSV</button>
+      <button id="btnReset">Restaurar valores originais</button>
+    </div>
+    <div class="hint">Preencha <b>Faturamento</b>, <b>Manut/mês</b> e <b>Financiamento</b> nas células pontilhadas — tudo é recalculado e salvo no navegador. Clique no título de uma coluna para ordenar.</div>
+
+    <div class="tw">
+      <table>
+        <thead><tr>
+          <th class="l" data-sort="placa">Placa<span class="ar">⇅</span></th><th class="l" data-sort="mot">Motorista<span class="ar">⇅</span></th><th class="l" data-sort="cfg">Config.<span class="ar">⇅</span></th>
+          <th class="c-km" data-sort="km">KM Rodados<span class="ar">⇅</span></th><th data-sort="fat">Faturamento<span class="ar">⇅</span></th><th class="c-comb" data-sort="comb">Combustível<span class="ar">⇅</span></th>
+          <th class="c-com" data-sort="com" id="thCom">Comissão (10%)<span class="ar">⇅</span></th><th class="c-man" data-sort="man">Manut/Mês<span class="ar">⇅</span></th>
+          <th class="c-fin" data-sort="fin">Financiamento<span class="ar">⇅</span></th><th class="c-out" data-sort="out">Outras Despesas<span class="ar">⇅</span></th>
+          <th class="c-res" data-sort="res">Resultado<span class="ar">⇅</span></th><th data-sort="pct">% Lucr.<span class="ar">⇅</span></th><th data-sort="kml">KM/L<span class="ar">⇅</span></th><th class="c-com" data-sort="mkm">Manut/KM<span class="ar">⇅</span></th><th class="c-res" data-sort="lkm">Lucro/KM<span class="ar">⇅</span></th>
+        </tr></thead>
+        <tbody id="rows"></tbody>
+        <tfoot id="foot"></tfoot>
+      </table>
+    </div>
+
+    <div class="hm" id="hm"></div>
+    <div class="notes"></div>
+  </section>
+
+  <section class="view" id="view-sim">
+    <div class="sim">
+      <h2>Simulador de meta de consumo</h2>
+      <p class="lead">Quanto a empresa economiza se a média de km/L melhorar, e quanto o motorista ganha de prêmio por isso. Todos os campos são editáveis; os valores iniciais vêm do mês selecionado.</p>
+
+      <div class="sim-in" id="simIn">
+        <label hidden>Média atual (km/L)<input id="sAtual" type="text" inputmode="decimal"><small id="sAtualH"></small></label>
+        <label>Média meta (km/L)<input id="sMeta" type="text" inputmode="decimal"><small>Ex.: 2,30</small></label>
+        <label>Comissão ao atingir a meta (%)<input id="sPct" type="text" inputmode="decimal"><small id="sPctH"></small></label>
+        <label hidden>Prêmio calculado sobre<select id="sBase"><option value="eco">Economia de combustível</option><option value="com">Comissão do motorista</option><option value="fat">Faturamento</option></select><small id="sBaseH"></small></label>
+        <label>Preço do diesel (R$/L)<input id="sPreco" type="text" inputmode="decimal"><small id="sPrecoH"></small></label>
+        <label hidden>KM por veículo/mês<input id="sKm" type="text" inputmode="decimal"><small id="sKmH"></small></label>
+        <label hidden>Nº de veículos<input id="sN" type="text" inputmode="numeric"><small id="sNH"></small></label>
+      </div>
+      <div class="sim-act"><button id="sReset">Voltar aos dados do mês</button><span id="sNote"></span></div>
+
+      <div class="sim-split">
+        <div class="box"><h3>Quem fica com a economia</h3><div id="sBar"></div></div>
+        <div class="box"><h3>Antes × depois (por veículo)</h3><div id="sCmp"></div></div>
+      </div>
+
+      <div class="box" style="padding:0">
+        <div style="padding:14px 16px 0"><h3>Por veículo (média real do mês × meta)</h3>
+          <p class="lead" style="margin:0 0 10px">A meta de cada veículo começa igual à meta geral e pode ser alterada na própria linha. Veículos que já estão acima da meta não geram economia.</p></div>
+        <div class="tw" style="margin:0;border:0;border-top:1px solid var(--line);border-radius:0 0 12px 12px"><table class="sim-t"><thead><tr id="sHead"></tr></thead><tbody id="sRows"></tbody><tfoot id="sFoot"></tfoot></table></div>
+      </div>
+      <div class="sim-foot" id="sFoot2"></div>
+    </div>
+  </section>
+</div>
+
+<div class="md-bg" id="mdBg"><div class="md" role="dialog" aria-modal="true"><div class="md-h"><div><h3 id="mdT"></h3><p id="mdS"></p></div><button class="md-x" aria-label="Fechar">×</button></div><div class="md-chips" id="mdC"></div><div class="md-b" id="mdB"></div><div class="md-f"><span>Total de outras despesas</span><span id="mdTot"></span></div></div></div>
+
+<script>
+// ===================== DADOS =====================
+// comb = combustível líquido (R$) · fat = faturamento bruto · fin = financiamento · man = manutenção · out = outras despesas
+const VSEP = [
+ {placa:"SER8B89",mot:"ALANDEON",cfg:"6X4",km:7785,l:3458.27,comb:22451.35,fat:53231.62,man:7538.62,mc:1,md:2157.06,fin:23721.41},
+ {placa:"SEB0C73",mot:"EGUIMAR",cfg:"6X2",km:10746,l:5088.95,comb:33970.95,fat:90610.55,man:16467.77,mc:1,md:11086.21,fin:7771.67,w:"Desconto de R$ 575,73 já abatido (líquido)."},
+ {placa:"EVQ4G36",mot:"GENIVALDO",cfg:"6X2",km:10738,l:5704.39,comb:37703.68,fat:109276.68,man:11474.74,mc:1,md:6093.18,fin:8101.19},
+ {placa:"FAG6C74",mot:"PEDRO HENRIQUE",cfg:"6X2",km:8671,l:4341.35,comb:28847.78,fat:68903.28,man:9889.41,mc:1,md:4507.85,fin:27880.84,w:"Abastecimentos de 08 e 09/09 com média incoerente (25,45 e 0,04 km/l) — provável erro de odômetro; o total do mês fecha."},
+ {placa:"SED9E99",mot:"OTAVIO",cfg:"6X2",km:6043,l:3071.44,comb:20279.6,fat:51987.38,man:11387.38,mc:1,md:6005.82,fin:20017.12},
+ {placa:"SPG8H44",mot:"LUCAS",cfg:"6X2",km:5709,l:2789.74,comb:18381.91,fat:54678.93,man:11604.82,mc:1,md:6223.26,fin:31796.9},
+ {placa:"OAW3H43",mot:"LINDOMAR GODOY",cfg:"6X4",km:4994,l:2255.77,comb:14823.5,fat:49066.19,man:8594.32,mc:1,md:3212.76},
+ {placa:"RAW9C35",mot:"GILSON",cfg:"6X2",km:3147,l:1463.74,comb:8376.91,fat:32745.0,man:16182.78,mc:1,md:10801.22,fin:16604.34,w:"Só 3 abastecimentos (a partir de 21/09) e preço unitário de R$ 4,17 no primeiro (padrão do período ≈ R$ 6,79). Possível falta de lançamentos."},
+ {placa:"SEF7G88",mot:"WILLES",cfg:"6X4",km:6913,l:3576.77,comb:23571.85,fat:52532.28,man:18634.42,mc:1,md:13252.86,fin:8270.0,w:"Abastecimento de 10/09 (770 L) com média de 0,54 km/l — possível erro de lançamento. Desconto de R$ 180,36 já abatido."},
+ {placa:"RXP0A12",mot:"MANOEL",cfg:"6X2",km:6597,l:2948.98,comb:19188.57,fat:61288.0,man:11706.67,mc:1,md:6325.11,fin:17781.12},
+ {placa:"QWE9A32",mot:"LINDOMAR FRANCISCO",cfg:"6X4",km:6289,l:3031.38,comb:19778.5,fat:51226.55,man:9921.42,mc:1,md:4539.86,fin:6489.52,w:"Desconto de R$ 286,23 já abatido (líquido). Abastecimento de 10/09 com média 0,01 km/l."},
+ {placa:"RXW2G64",mot:"ANTONIO BISPO",cfg:"6X2",km:5547,l:2648.08,comb:17245.25,fat:50400.45,man:10032.95,mc:1,md:4651.39,fin:16236.42},
+ {placa:"RAQ1D79",mot:"ELISNEI",cfg:"6X2",km:5838,l:2827.42,comb:18777.58,fat:49290.36,man:12961.63,mc:1,md:7580.07},
+ {placa:"FFL2G91",mot:"DAFHNIS",cfg:"6X4",km:10602,l:5008.1,comb:33035.39,fat:93042.05,man:11664.91,mc:1,md:6283.35,fin:23638.6},
+ {placa:"FAF4J74",mot:"GILSON / ROMILDO",cfg:"6X2",km:5832,l:2552.3,comb:16685.72,fat:42083.5,man:11720.4,mc:1,md:6338.84,w:"Dois motoristas no período. Abastecimento de 03/09 (120 L) com média 0,00."},
+ {placa:"RAR7F60",mot:"VINICIUS / IAGO",cfg:"6X2",km:2401,l:664.04,comb:4290.16,fat:22088.5,man:14134.79,mc:1,md:8753.23,w:"Apenas 3 abastecimentos e 2 motoristas; 3,62 km/l é atípico — provável falta de lançamentos de combustível."},
+ {placa:"RAU0H20",mot:"IAGO",cfg:"",km:4860,l:2163.65,comb:14086.23,fat:50322.57,man:11432.63,mc:1,md:6051.07,fin:15850.61,w:"Placa não consta no layout de referência — confirmar configuração (6X2/6X4)."}
+];
+const VOUT = [
+ {placa:"SER8B89",mot:"ALANDEON",cfg:"6X4",km:9175,l:4244.054,comb:25003.52,fat:93303.7,man:2852.56,mc:9,md:2852.56,mb:[210.0,47.5,0,1130.0,1065.06,400.0],fin:23721.41,out:3666.1,ob:{"Adiantamento de ICMS":2506.55,"Arla":968.16,"Mensalidade do sistema (pedágio)":11.39,"Rastreador":180.0},od:[["09/10","Adiantamento de ICMS","ESTADO DE MATO GROSSO","ADIANTAMENTO ICMS",1618.55,"4920/1/1"],["10/10","Arla","PETROLEMES DERIVADOS DE","ARLA",225.92,"10143/1"],["12/10","Arla","AUTO POSTO BV CAMARGO","ARLA",145.13,"10133/1"],["13/10","Adiantamento de ICMS","ESTADO DE MATO GROSSO","ADIANTAMENTO ICMS",888.0,"4914/1/1"],["16/10","Arla","POSTO TIGRAO LTDA","ARLA",149.42,"10197/1"],["18/10","Arla","POSTO TIGRAO LTDA","ARLA",75.35,"10228/1"],["25/10","Arla","AUTO POSTO BV CAMARGO","ARLA",125.31,"10299/1"],["28/10","Arla","AUTO POSTO BV CAMARGO","ARLA",86.33,"10330/1"],["28/10","Mensalidade do sistema (pedágio)","MOVE MAIS MEIOS DE","Mensalidade, licenças de sistema",11.39,"1/9373/16/1"],["30/10","Arla","POSTO DE COMBUSTIVEIS","ARLA",160.7,"10353/3"],["31/10","Rastreador","GLOBAL SYSTEM","Rastreador mensalidade",180.0,"4941/1/1"]]},
+ {placa:"SEB0C73",mot:"EGUIMAR",cfg:"6X2",km:7969,l:3914.367,comb:21211.94,fat:88101.38,man:10385.44,mc:29,md:10385.44,mb:[6791.44,600.0,0,2594.0,0,400.0],fin:7771.67,out:2380.31,ob:{"Arla":721.33,"Mensalidade do sistema (pedágio)":11.39,"Pedágio":664.2,"IPVA/Licenciamento":803.39,"Rastreador":180.0},od:[["07/10","Arla","WELINGTON BRASIL ZUCATO","ARLA",100.0,"10150/2"],["10/10","Arla","PETROLEMES DERIVADOS DE","ARLA",130.08,"10142/2"],["19/10","Arla","AUTO POSTO BV CAMARGO","ARLA",137.29,"10229/1"],["23/10","Arla","AUTO POSTO BV CAMARGO","ARLA",1.59,"10290/1"],["24/10","Arla","AUTO POSTO BV CAMARGO","ARLA",144.91,"10304/1"],["28/10","Arla","POSTO TIGRAO LTDA","ARLA",110.59,"10322/1"],["28/10","Mensalidade do sistema (pedágio)","MOVE MAIS MEIOS DE","Mensalidade, licenças de sistema",11.39,"1/9373/13/1"],["28/10","Pedágio","MOVE MAIS MEIOS DE","PEDAGIOS",664.2,"1/9373/28/1"],["30/10","IPVA/Licenciamento","ESTADO DE MATO GROSSO","IPVA/Licenciamento",803.39,"3984/1/1"],["31/10","Arla","POSTO PARADA DO","ARLA",96.87,"10367/1"],["31/10","Rastreador","GLOBAL SYSTEM","Rastreador mensalidade",180.0,"4941/1/1"]],w:"Abastecimento de 07/10 (787 L) veio com valor de R$ 6,99 no relatório — provável erro de lançamento (a ~R$ 6,99/L seriam cerca de R$ 5.500). Total do relatório mantido."},
+ {placa:"EVQ4G36",mot:"GENIVALDO / ROSIMAR",cfg:"6X2",km:10397,l:4806.272,comb:32840.75,fat:83005.17,man:3482.0,mc:16,md:3482.0,mb:[1713.07,455.0,0,0,913.93,400.0],fin:8101.19,out:2122.84,ob:{"Arla":1002.92,"Pedágio":874.53,"Estacionamento":54.0,"Mensalidade do sistema (pedágio)":11.39,"Rastreador":180.0},od:[["06/10","Arla","POSTO PARADA DO","ARLA",122.34,"10154/1"],["07/10","Arla","POSTO PARADA DO","ARLA",158.41,"10146/1"],["08/10","Pedágio","MOVE MAIS MEIOS DE","PEDAGIOS",252.6,"1/9192/2/1"],["13/10","Arla","REDE DE POSTOS MARAJO","ARLA",111.66,"10248/2"],["15/10","Arla","AUTO POSTO VIAJANTES","ARLA",126.77,"10193/2"],["16/10","Estacionamento","GENIVALDO DA SILVA LIMA","Estacionamento",54.0,"4925/1/1"],["20/10","Arla","AUTO POSTO BV CAMARGO","ARLA",75.05,"10244/1"],["20/10","Pedágio","MOVE MAIS MEIOS DE","PEDAGIOS",46.8,"1/9303/1/1"],["22/10","Arla","POSTO ALDO PRIMAVERA","ARLA",155.74,"10288/2"],["28/10","Arla","AUTO POSTO BV CAMARGO","ARLA",36.9,"10324/1"],["28/10","Mensalidade do sistema (pedágio)","MOVE MAIS MEIOS DE","Mensalidade, licenças de sistema",11.39,"1/9373/1/1"],["28/10","Pedágio","MOVE MAIS MEIOS DE","PEDAGIOS",575.13,"1/9373/19/1"],["30/10","Arla","POSTO DE COMBUSTIVEIS","ARLA",216.05,"10352/3"],["31/10","Rastreador","GLOBAL SYSTEM","Rastreador mensalidade",180.0,"4941/1/1"]],fn:"Soma de Genivaldo (R$ 73.149,17) e Rosimar (R$ 9.856,00, 2ªQNZ) — ambos lançados na EVQ4G36 na planilha."},
+ {placa:"FAG6C74",mot:"PEDRO HENRIQUE",cfg:"6X2",km:5881,l:2616.669,comb:13945.87,fat:70117.06,man:1195.0,mc:4,md:1195.0,mb:[755.0,0,0,40.0,0,400.0],fin:27880.84,out:2343.63,ob:{"Pedágio":1249.76,"Arla":902.48,"Mensalidade do sistema (pedágio)":11.39,"Rastreador":180.0},od:[["08/10","Pedágio","MOVE MAIS MEIOS DE","PEDAGIOS",604.94,"1/9192/3/1"],["13/10","Arla","WELINGTON BRASIL ZUCATO","ARLA",300.0,"10158/1"],["17/10","Arla","POSTO SANTO ANTONIO","ARLA",101.53,"10250/1"],["18/10","Arla","POSTO DE COMBUSTIVEIS","ARLA",180.9,"10226/2"],["28/10","Arla","AUTO POSTO BV CAMARGO","ARLA",150.55,"10328/1"],["28/10","Mensalidade do sistema (pedágio)","MOVE MAIS MEIOS DE","Mensalidade, licenças de sistema",11.39,"1/9373/3/1"],["28/10","Pedágio","MOVE MAIS MEIOS DE","PEDAGIOS",644.82,"1/9373/20/1"],["30/10","Arla","POSTO DE COMBUSTIVEIS","ARLA",169.5,"10354/3"],["31/10","Rastreador","GLOBAL SYSTEM","Rastreador mensalidade",180.0,"4941/1/1"]],fn:"Pedro Henrique (R$ 70.117,06). A planilha lança Lindomar Godoy em “OAW3H43/ FAG6C74” sem divisão; todo o faturamento dele foi atribuído à OAW3H43."},
+ {placa:"SED9E99",mot:"OTAVIO",cfg:"6X2",km:11098,l:5463.515,comb:37585.84,fat:97655.26,man:6441.08,mc:22,md:6441.08,mb:[1967.34,1471.0,0,70.0,2332.74,600.0],fin:20017.12,out:1149.44,ob:{"Arla":623.67,"Pedágio":334.38,"Mensalidade do sistema (pedágio)":11.39,"Rastreador":180.0},od:[["07/10","Arla","POSTO TIGRAO LTDA","ARLA",4.07,"10114/1"],["08/10","Pedágio","MOVE MAIS MEIOS DE","PEDAGIOS",35.1,"1/9192/7/1"],["14/10","Arla","POSTO TIGRAO LTDA","ARLA",85.02,"10179/1"],["15/10","Arla","POSTO DE COMBUSTIVEIS","ARLA",125.21,"10195/2"],["22/10","Arla","AUTO POSTO BV CAMARGO","ARLA",103.27,"10286/1"],["28/10","Arla","POSTO TIGRAO LTDA","ARLA",144.44,"10323/1"],["28/10","Mensalidade do sistema (pedágio)","MOVE MAIS MEIOS DE","Mensalidade, licenças de sistema",11.39,"1/9373/14/1"],["28/10","Pedágio","MOVE MAIS MEIOS DE","PEDAGIOS",299.28,"1/9373/29/1"],["30/10","Arla","POSTO DE COMBUSTIVEIS","ARLA",161.66,"10355/1"],["31/10","Rastreador","GLOBAL SYSTEM","Rastreador mensalidade",180.0,"4941/1/1"]]},
+ {placa:"SPG8H44",mot:"LUCAS",cfg:"6X2",km:11470,l:5346.891,comb:36372.22,fat:95057.95,man:1473.99,mc:9,md:1473.99,mb:[983.99,0,0,90.0,0,400.0],fin:31796.9,out:1443.51,ob:{"Arla":770.19,"Pedágio":364.8,"Mensalidade do sistema (pedágio)":11.39,"Multas":117.13,"Rastreador":180.0},od:[["07/10","Arla","POSTO TIGRAO LTDA","ARLA",3.0,"10113/1"],["08/10","Pedágio","MOVE MAIS MEIOS DE","PEDAGIOS",283.86,"1/9192/9/1"],["13/10","Arla","REDE DE POSTOS MARAJO","ARLA",200.68,"10249/2"],["15/10","Arla","AUTO POSTO VIAJANTES","ARLA",138.97,"10192/2"],["20/10","Pedágio","MOVE MAIS MEIOS DE","PEDAGIOS",80.94,"1/9303/7/1"],["24/10","Arla","AUTO POSTO BV CAMARGO","ARLA",138.88,"10296/1"],["28/10","Mensalidade do sistema (pedágio)","MOVE MAIS MEIOS DE","Mensalidade, licenças de sistema",11.39,"1/9373/17/1"],["29/10","Arla","POSTO TIGRAO LTDA","ARLA",168.12,"10339/1"],["30/10","Multas","ESTADO DE MATO GROSSO","Multa de Transito",117.13,"4929/1/1"],["31/10","Arla","POSTO PARADA DO","ARLA",120.54,"10369/1"],["31/10","Rastreador","GLOBAL SYSTEM","Rastreador mensalidade",180.0,"4941/1/1"]]},
+ {placa:"OAW3H43",mot:"LINDOMAR GODOY",cfg:"6X4",km:5181,l:2395.234,comb:16292.82,fat:63756.68,man:3854.28,mc:15,md:3854.28,mb:[2344.28,1270.0,0,40.0,0,200.0],out:1130.82,ob:{"Arla":131.91,"Mensalidade do sistema (pedágio)":11.39,"Pedágio":263.34,"IPVA/Licenciamento":544.18,"Rastreador":180.0},od:[["19/10","Arla","AUTO POSTO BV CAMARGO","ARLA",27.28,"10230/1"],["26/10","Arla","POSTO SAO TOMAS DE","ARLA",104.63,"10319/1"],["28/10","Mensalidade do sistema (pedágio)","MOVE MAIS MEIOS DE","Mensalidade, licenças de sistema",11.39,"1/9373/5/1"],["28/10","Pedágio","MOVE MAIS MEIOS DE","PEDAGIOS",263.34,"1/9373/22/1"],["30/10","IPVA/Licenciamento","ESTADO DE MATO GROSSO","IPVA/Licenciamento",544.18,"3788/1/1"],["31/10","Rastreador","GLOBAL SYSTEM","Rastreador mensalidade",180.0,"4941/1/1"]],fn:"Planilha traz Lindomar Godoy em “OAW3H43/ FAG6C74” (R$ 63.756,68) sem divisão por placa; atribuído integralmente à OAW3H43."},
+ {placa:"RAW9C35",mot:"GILSON",cfg:"6X2",km:10054,l:4690.758,comb:31984.34,fat:91568.35,man:13219.43,mc:13,md:13219.43,mb:[1041.0,0,9160.0,1884.0,934.43,200.0],fin:16604.34,out:1880.72,ob:{"Arla":821.59,"Lançamentos diversos":425.0,"Mensalidade do sistema (pedágio)":11.39,"Pedágio":442.74,"Rastreador":180.0},od:[["05/10","Arla","POSTO TIGRAO LTDA","ARLA",97.05,"10084/1"],["08/10","Arla","POSTO TIGRAO LTDA","ARLA",78.51,"10120/1"],["12/10","Arla","POSTO TIGRAO LTDA","ARLA",91.88,"10136/1"],["14/10","Arla","POSTO TIGRAO LTDA","ARLA",75.02,"10177/1"],["15/10","Arla","POSTO DE COMBUSTIVEIS","ARLA",119.11,"10251/2"],["20/10","Lançamentos diversos","GILSON SCHNEIDER","LANÇAMENTOS DIVERSOS",425.0,"4928/1/1"],["23/10","Arla","AUTO POSTO BV CAMARGO","ARLA",93.79,"10291/1"],["28/10","Arla","AUTO POSTO BV CAMARGO","ARLA",149.96,"10326/1"],["28/10","Mensalidade do sistema (pedágio)","MOVE MAIS MEIOS DE","Mensalidade, licenças de sistema",11.39,"1/9373/10/1"],["28/10","Pedágio","MOVE MAIS MEIOS DE","PEDAGIOS",442.74,"1/9373/25/1"],["30/10","Arla","POSTO DE COMBUSTIVEIS","ARLA",116.27,"10372/2"],["31/10","Rastreador","GLOBAL SYSTEM","Rastreador mensalidade",180.0,"4941/1/1"]],w:"Abastecimento de 27/10 lançado em duas linhas (148,77 L + 1,23 L) e de 28/10 com média de 0,43 km/l — provável erro de odômetro; o total do mês fecha."},
+ {placa:"SEF7G88",mot:"WILLES",cfg:"6X4",km:10365,l:4928.336,comb:33339.08,fat:87865.13,man:12897.23,mc:22,md:12897.23,mb:[10140.54,0,0,1307.0,949.69,500.0],fin:8270.0,out:2026.31,ob:{"Arla":836.28,"Pedágio":998.64,"Mensalidade do sistema (pedágio)":11.39,"Rastreador":180.0},od:[["06/10","Arla","POSTO PARADA DO","ARLA",92.56,"10156/1"],["07/10","Arla","POSTO PARADA DO","ARLA",138.54,"10121/1"],["08/10","Pedágio","MOVE MAIS MEIOS DE","PEDAGIOS",241.86,"1/9192/8/1"],["11/10","Arla","POSTO TIGRAO LTDA","ARLA",78.3,"10140/1"],["13/10","Arla","REDE DE POSTOS MARAJO","ARLA",87.55,"10247/2"],["15/10","Arla","AUTO POSTO VIAJANTES","ARLA",108.57,"10191/2"],["19/10","Arla","AUTO POSTO BV CAMARGO","ARLA",45.74,"10237/1"],["26/10","Arla","POSTO MAR DAS PEDRAS","ARLA",135.84,"10318/2"],["28/10","Arla","POSTO TIGRAO LTDA","ARLA",70.41,"10327/1"],["28/10","Mensalidade do sistema (pedágio)","MOVE MAIS MEIOS DE","Mensalidade, licenças de sistema",11.39,"1/9373/15/1"],["28/10","Pedágio","MOVE MAIS MEIOS DE","PEDAGIOS",756.78,"1/9373/30/1"],["31/10","Arla","POSTO PARADA DO","ARLA",78.77,"10368/1"],["31/10","Rastreador","GLOBAL SYSTEM","Rastreador mensalidade",180.0,"4941/1/1"]]},
+ {placa:"RXP0A12",mot:"MANOEL",cfg:"6X2",km:6721,l:2999.805,comb:20426.3,fat:52205.59,man:31523.27,mc:35,md:31523.27,mb:[25454.8,3144.0,0,1644.0,880.47,400.0],fin:17781.12,out:3229.68,ob:{"Arla":181.16,"Pedágio":283.86,"Mensalidade do sistema (pedágio)":11.39,"IPVA/Licenciamento":803.39,"Adiantamento de ICMS":1769.88,"Rastreador":180.0},od:[["19/10","Arla","AUTO POSTO BV CAMARGO","ARLA",74.58,"10231/1"],["20/10","Pedágio","MOVE MAIS MEIOS DE","PEDAGIOS",182.4,"1/9303/5/1"],["28/10","Mensalidade do sistema (pedágio)","MOVE MAIS MEIOS DE","Mensalidade, licenças de sistema",11.39,"1/9373/11/1"],["28/10","Pedágio","MOVE MAIS MEIOS DE","PEDAGIOS",101.46,"1/9373/26/1"],["29/10","Arla","AUTO POSTO BV CAMARGO","ARLA",55.89,"10335/1"],["30/10","Arla","POSTO PARADA DO","ARLA",50.69,"10371/1"],["30/10","IPVA/Licenciamento","ESTADO DE MATO GROSSO","IPVA/Licenciamento",803.39,"3807/1/1"],["30/10","Adiantamento de ICMS","ESTADO DE MATO GROSSO","ADIANTAMENTO ICMS",1769.88,"4938/1/1"],["31/10","Rastreador","GLOBAL SYSTEM","Rastreador mensalidade",180.0,"4941/1/1"]]},
+ {placa:"QWE9A32",mot:"LINDOMAR FRANCISCO",cfg:"6X4",km:11400,l:5533.688,comb:37482.43,fat:94042.39,man:2213.71,mc:15,md:2213.71,mb:[732.4,365.0,0,0,916.31,200.0],fin:6489.52,out:1864.13,ob:{"Arla":990.12,"Pedágio":682.62,"Mensalidade do sistema (pedágio)":11.39,"Rastreador":180.0},od:[["06/10","Arla","POSTO PARADA DO","ARLA",94.05,"10155/1"],["07/10","Arla","POSTO PARADA DO","ARLA",180.19,"10145/1"],["12/10","Arla","POSTO TIGRAO LTDA","ARLA",71.14,"10135/1"],["13/10","Arla","REDE DE POSTOS MARAJO","ARLA",93.35,"10245/2"],["15/10","Arla","AUTO POSTO VIAJANTES","ARLA",125.58,"10189/2"],["20/10","Pedágio","MOVE MAIS MEIOS DE","PEDAGIOS",185.82,"1/9303/4/1"],["21/10","Arla","AUTO POSTO BV CAMARGO","ARLA",169.94,"10276/1"],["26/10","Arla","AUTO POSTO BV CAMARGO","ARLA",81.27,"10303/1"],["28/10","Arla","POSTO TIGRAO LTDA","ARLA",174.6,"10331/1"],["28/10","Mensalidade do sistema (pedágio)","MOVE MAIS MEIOS DE","Mensalidade, licenças de sistema",11.39,"1/9373/6/1"],["28/10","Pedágio","MOVE MAIS MEIOS DE","PEDAGIOS",496.8,"1/9373/23/1"],["31/10","Rastreador","GLOBAL SYSTEM","Rastreador mensalidade",180.0,"4941/1/1"]]},
+ {placa:"RXW2G64",mot:"ANTONIO BISPO",cfg:"6X2",km:10920,l:5132.776,comb:34943.85,fat:93917.16,man:9310.56,mc:34,md:9310.56,mb:[3085.84,1048.5,0,3858.0,918.22,400.0],fin:16236.42,out:3780.67,ob:{"Arla":504.56,"Pedágio":511.45,"Mensalidade do sistema (pedágio)":11.39,"IPVA/Licenciamento":803.39,"Adiantamento de ICMS":1769.88,"Rastreador":180.0},od:[["07/10","Arla","POSTO TIGRAO LTDA","ARLA",3.0,"10117/1"],["08/10","Pedágio","MOVE MAIS MEIOS DE","PEDAGIOS",65.4,"1/9192/6/1"],["14/10","Arla","AUTO POSTO BV CAMARGO","ARLA",82.75,"10178/1"],["19/10","Arla","AUTO POSTO BV CAMARGO","ARLA",108.61,"10238/1"],["20/10","Pedágio","MOVE MAIS MEIOS DE","PEDAGIOS",40.47,"1/9303/6/1"],["22/10","Arla","POSTO TIGRAO LTDA","ARLA",79.64,"10284/1"],["25/10","Arla","AUTO POSTO BV CAMARGO","ARLA",56.72,"10300/1"],["27/10","Arla","POSTO TIGRAO LTDA","ARLA",91.32,"10321/1"],["28/10","Mensalidade do sistema (pedágio)","MOVE MAIS MEIOS DE","Mensalidade, licenças de sistema",11.39,"1/9373/12/1"],["28/10","Pedágio","MOVE MAIS MEIOS DE","PEDAGIOS",405.58,"1/9373/27/1"],["29/10","Arla","POSTO TIGRAO LTDA","ARLA",39.05,"10338/1"],["30/10","Arla","POSTO PARADA DO","ARLA",43.47,"10374/1"],["30/10","IPVA/Licenciamento","ESTADO DE MATO GROSSO","IPVA/Licenciamento",803.39,"3834/1/1"],["30/10","Adiantamento de ICMS","ESTADO DE MATO GROSSO","ADIANTAMENTO ICMS",1769.88,"4937/1/1"],["31/10","Rastreador","GLOBAL SYSTEM","Rastreador mensalidade",180.0,"4941/1/1"]]},
+ {placa:"RAQ1D79",mot:"ELISNEI",cfg:"6X2",km:5369,l:3057.246,comb:20868.82,fat:66633.84,man:5605.99,mc:27,md:5605.99,mb:[3447.99,1388.0,0,370.0,0,400.0],out:2633.73,ob:{"Pedágio":263.34,"Arla":409.12,"Mensalidade do sistema (pedágio)":11.39,"Adiantamento de ICMS":1769.88,"Rastreador":180.0},od:[["08/10","Pedágio","MOVE MAIS MEIOS DE","PEDAGIOS",263.34,"1/9192/5/1"],["14/10","Arla","AUTO POSTO BV CAMARGO","ARLA",98.63,"10180/1"],["21/10","Arla","AUTO POSTO BV CAMARGO","ARLA",106.1,"10256/1"],["26/10","Arla","POSTO TIGRAO LTDA","ARLA",63.07,"10317/1"],["28/10","Mensalidade do sistema (pedágio)","MOVE MAIS MEIOS DE","Mensalidade, licenças de sistema",11.39,"1/9373/7/1"],["29/10","Arla","POSTO TIGRAO LTDA","ARLA",94.2,"10336/1"],["30/10","Arla","POSTO PARADA DO","ARLA",47.12,"10380/1"],["30/10","Adiantamento de ICMS","ESTADO DE MATO GROSSO","ADIANTAMENTO ICMS",1769.88,"4940/1/1"],["31/10","Rastreador","GLOBAL SYSTEM","Rastreador mensalidade",180.0,"4941/1/1"]]},
+ {placa:"FFL2G91",mot:"DAFHNIS",cfg:"6X4",km:11188,l:5067.986,comb:34144.81,fat:91217.53,man:4678.35,mc:8,md:4678.35,mb:[2246.29,605.0,0,0,1227.06,600.0],fin:23638.6,out:2962.4,ob:{"Arla":1219.37,"Pedágio":1551.64,"Mensalidade do sistema (pedágio)":11.39,"Rastreador":180.0},od:[["06/10","Arla","POSTO PARADA DO","ARLA",154.32,"10153/1"],["07/10","Arla","POSTO PARADA DO","ARLA",225.39,"10147/1"],["08/10","Pedágio","MOVE MAIS MEIOS DE","PEDAGIOS",511.0,"1/9192/4/1"],["11/10","Arla","POSTO TIGRAO LTDA","ARLA",118.25,"10141/1"],["13/10","Arla","REDE DE POSTOS MARAJO","ARLA",120.52,"10246/2"],["15/10","Arla","AUTO POSTO VIAJANTES","ARLA",125.58,"10190/2"],["19/10","Arla","AUTO POSTO BV CAMARGO","ARLA",71.42,"10236/1"],["20/10","Pedágio","MOVE MAIS MEIOS DE","PEDAGIOS",185.82,"1/9303/3/1"],["22/10","Arla","POSTO TIGRAO LTDA","ARLA",115.07,"10285/1"],["26/10","Arla","POSTO TIGRAO LTDA","ARLA",75.47,"10310/1"],["28/10","Arla","POSTO TIGRAO LTDA","ARLA",107.84,"10325/1"],["28/10","Mensalidade do sistema (pedágio)","MOVE MAIS MEIOS DE","Mensalidade, licenças de sistema",11.39,"1/9373/4/1"],["28/10","Pedágio","MOVE MAIS MEIOS DE","PEDAGIOS",854.82,"1/9373/21/1"],["31/10","Arla","POSTO PARADA DO","ARLA",105.51,"10370/1"],["31/10","Rastreador","GLOBAL SYSTEM","Rastreador mensalidade",180.0,"4941/1/1"]]},
+ {placa:"FAF4J74",mot:"ROMILDO",cfg:"6X2",km:3949,l:1684.479,comb:11388.44,fat:36745.76,man:15109.04,mc:34,md:15109.04,mb:[6369.57,2161.0,5118.0,180.0,880.47,400.0],out:3208.9,ob:{"Arla":314.91,"Pedágio":249.85,"Mensalidade do sistema (pedágio)":11.39,"IPVA/Licenciamento":618.54,"Multas":1834.21,"Rastreador":180.0},od:[["05/10","Arla","AUTO POSTO BV CAMARGO","ARLA",82.32,"10089/1"],["07/10","Arla","POSTO TIGRAO LTDA","ARLA",102.56,"10115/1"],["11/10","Arla","POSTO TIGRAO LTDA","ARLA",130.03,"10138/1"],["20/10","Pedágio","MOVE MAIS MEIOS DE","PEDAGIOS",249.85,"1/9303/2/1"],["28/10","Mensalidade do sistema (pedágio)","MOVE MAIS MEIOS DE","Mensalidade, licenças de sistema",11.39,"1/9373/2/1"],["30/10","IPVA/Licenciamento","ESTADO DE MATO GROSSO","IPVA/Licenciamento",618.54,"3825/1/1"],["30/10","Multas","ESTADO DE MATO GROSSO","Multa de Transito",1548.19,"4930/1/1"],["30/10","Multas","ESTADO DE MATO GROSSO","Multa Paga",143.01,"4931/1/1"],["30/10","Multas","ESTADO DE MATO GROSSO","Multa de Transito",143.01,"4932/1/1"],["31/10","Rastreador","GLOBAL SYSTEM","Rastreador mensalidade",180.0,"4941/1/1"]],fn:"Romildo (R$ 36.745,76, 1ªQNZ)."},
+ {placa:"RAR7F60",mot:"IAGO",cfg:"6X2",km:8456,l:3782.356,comb:25536.76,fat:69043.01,man:9612.46,mc:25,md:9612.46,mb:[1175.75,440.0,5118.0,1950.0,928.71,0],out:2791.28,ob:{"Arla":682.11,"Mensalidade do sistema (pedágio)":11.39,"Pedágio":147.9,"Adiantamento de ICMS":1769.88,"Rastreador":180.0},od:[["01/10","Arla","POSTO TIGRAO LTDA","ARLA",73.26,"10035/1"],["03/10","Arla","POSTO TIGRAO LTDA","ARLA",83.86,"10067/1"],["06/10","Arla","POSTO TIGRAO LTDA","ARLA",55.28,"10095/1"],["09/10","Arla","POSTO TIGRAO LTDA","ARLA",37.85,"10126/1"],["19/10","Arla","AUTO POSTO BV CAMARGO","ARLA",138.2,"10235/1"],["26/10","Arla","POSTO SAO TOMAS DE","ARLA",127.41,"10320/1"],["28/10","Mensalidade do sistema (pedágio)","MOVE MAIS MEIOS DE","Mensalidade, licenças de sistema",11.39,"1/9373/8/1"],["28/10","Pedágio","MOVE MAIS MEIOS DE","PEDAGIOS",147.9,"1/9373/24/1"],["29/10","Arla","AUTO POSTO BV CAMARGO","ARLA",97.0,"10340/2"],["30/10","Arla","POSTO PARADA DO","ARLA",69.25,"10373/1"],["30/10","Adiantamento de ICMS","ESTADO DE MATO GROSSO","ADIANTAMENTO ICMS",1769.88,"4939/1/1"],["31/10","Rastreador","GLOBAL SYSTEM","Rastreador mensalidade",180.0,"4941/1/1"]],fn:"Iago (R$ 69.043,01)."},
+ {placa:"RAU0H20",mot:"—",cfg:"",km:2086,l:470.001,comb:3251.3,man:0,mc:0,md:0,mb:[0,0,0,0,0,0],fin:15850.61,out:1053.0,ob:{"Lançamentos diversos":100.0,"Pedágio":70.86,"IPVA/Licenciamento":702.14,"Rastreador":180.0},od:[["06/10","Lançamentos diversos","PRESTADORES EM GERAL","LANÇAMENTOS DIVERSOS",100.0,"4909/1/1"],["08/10","Pedágio","MOVE MAIS MEIOS DE","TAXA DE CANCELAMENTO",70.86,"1/9192/1/1"],["19/10","IPVA/Licenciamento","ESTADO DE MATO GROSSO","IPVA/Licenciamento",702.14,"4922/1/1"],["31/10","Rastreador","GLOBAL SYSTEM","Rastreador mensalidade",180.0,"4941/1/1"]],fn:"Combustível de outubro lançado (Lindomar Godoy e Lindomar Francisco), mas a planilha de faturamento não traz esta placa — sem Resultado."}
+];
+
+const MC=["Peças","Mão de obra","Aquisição de pneus","Recapagem","Volvo","Lava-jato"];
+const NOTES_SEP='<b>Premissas (setembro/2026):</b> Faturamento bruto conforme SETEMBRO_26_1.xlsx (RAT0H32 e QCN5I07 desconsiderados). Comissão = 10% do faturamento, tratada como custo. Combustível = valor <i>líquido</i> dos relatórios “Gerenciador de Média” de 01 a 30/09/2026; KM rodados = KM final − KM anterior; KM/L = KM ÷ litros. Financiamento conforme planilha enviada. <b>Manutenção:</b> soma de seis relatórios (peças, lava-jato, mão de obra, manutenção Volvo, recapagem/pneu e aquisição de pneus) por placa (R$ 113.863,14) + cota igual das despesas sem placa definida (R$ 91.486,54 ÷ 17 = R$ 5.381,56 por veículo), total R$ 205.350,00. Outras despesas de setembro não foram carregadas. Resultado = Faturamento − Combustível − Comissão − Manutenção − Financiamento (opcional pelo flag). % Lucr. = Resultado ÷ Faturamento.';
+const NOTES_OUT='<b>Premissas (outubro/2026):</b> Faturamento bruto conforme OUTUBRO_26.xlsx (R$ 1.274.235,96; aba TERCEIROS sem lançamentos); comissão = 10% do faturamento. Combustível = valor líquido do “Gerenciador de Média” de 01 a 31/10 (R$ 436.619,09 nas 17 placas). Financiamento: mesmos valores de setembro. <b>Manutenção e Outras despesas:</b> relatório “Listagem Quebra por Veículos” (Manutencoes_out.pdf), por placa. <i>Manutenção</i> = peças, lubrificantes, mão de obra, pneus (aquisição e recapagem/borracharia), manutenção/revisão Volvo e lava-jato (R$ 133.854,39). <i>Outras despesas</i> = Arla, pedágios (e mensalidade do sistema), rastreador, IPVA/licenciamento, multas, adiantamento de ICMS, estacionamento e lançamentos diversos (R$ 39.667,47). <b>Desconsiderados, conforme orientação:</b> óleo diesel (já computado no combustível), descontos de receita de frete e comissões/premiações. <b>Também fora:</b> prestação de veículo/consórcio (já está na coluna Financiamento), adiantamento salarial (R$ 5.000,00, Lindomar Francisco) e placas que não são do modelo. Há R$ 12.035,99 de manutenção com data de 03 a 05/11/2026 que vieram no relatório e foram mantidos. <b>Atribuições de faturamento:</b> EVQ4G36 = Genivaldo + Rosimar; OAW3H43 = Lindomar Godoy (a planilha o lança em “OAW3H43/ FAG6C74” sem divisão); FAG6C74 = Pedro Henrique; RAU0H20 sem faturamento.';
+const MONTHS={
+  "2026-09":{label:"Setembro/2026",V:VSEP,MQ:5381.5612,MQT:91486.54,key:"bx_resultado_2026_09",notes:NOTES_SEP},
+  "2026-10":{label:"Outubro/2026",V:VOUT,MQ:0,MQT:0,key:"bx_resultado_2026_10",notes:NOTES_OUT}
+};
+let MONTH,V,KEY,S,MQ=0,MQT=0;
+function loadMonth(m){
+  MONTH=m; V=MONTHS[m].V; KEY=MONTHS[m].key; MQ=MONTHS[m].MQ; MQT=MONTHS[m].MQT;
+  S={fat:{},man:{},fin:{},cfg:{},rate:10,useFin:true,sort:{k:"res",d:"desc"}};
+  try{const r=JSON.parse(localStorage.getItem(KEY));if(r)S=Object.assign(S,r)}catch(e){}
+  S.sort={k:"res",d:"desc"};
+  try{const q=JSON.parse(localStorage.getItem(KEY+"_sort"));if(q&&q.k)S.sort=q}catch(e){}
+  document.getElementById("mLbl").textContent="· BX · "+MONTHS[m].label;
+  document.querySelector(".notes").innerHTML=MONTHS[m].notes;
+  document.getElementById("rate").value=S.rate;
+  document.getElementById("useFin").checked=S.useFin!==false;
+  document.getElementById("month").value=m;
+  try{localStorage.setItem("bx_resultado_month",m)}catch(e){}
+}
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
+
+const nf0=new Intl.NumberFormat("pt-BR",{maximumFractionDigits:0});
+const nf1=new Intl.NumberFormat("pt-BR",{minimumFractionDigits:1,maximumFractionDigits:1});
+const nf2=new Intl.NumberFormat("pt-BR",{minimumFractionDigits:2,maximumFractionDigits:2});
+const brl=v=>(v<0?"R$ -":"R$ ")+nf0.format(Math.abs(v));
+const brl2=v=>(v<0?"R$ -":"R$ ")+nf2.format(Math.abs(v));
+const pctF=v=>nf1.format(v)+"%";
+function parse(s){
+  s=String(s).replace(/R\$|%|\s/g,"");
+  if(!s)return null;
+  if(s.includes(","))s=s.replace(/\./g,"").replace(",",".");
+  else if(/^\d{1,3}(\.\d{3})+$/.test(s))s=s.replace(/\./g,"");
+  const n=parseFloat(s);return isNaN(n)?null:n;
+}
+const cls=v=>v>=0?"pos":"neg";
+
+function calc(v){
+  const fat=S.fat[v.placa]??v.fat??null, man=S.man[v.placa]??v.man??null, fin=S.fin[v.placa]??v.fin??null, out=v.out??null;
+  const r=S.rate/100;
+  const com=fat!=null?fat*r:null;
+  const res=(fat!=null&&v.comb!=null)?fat-v.comb-com-(man||0)-(S.useFin!==false?(fin||0):0)-(out||0):null;
+  return {fat,man,fin,out,com,res,
+    pct:res!=null&&fat?res/fat*100:null,
+    kml:v.km&&v.l?v.km/v.l:null,
+    mkm:man!=null&&v.km?man/v.km:null,
+    lkm:res!=null&&v.km?res/v.km:null};
+}
+
+// ===================== TABELA =====================
+const SORTK={placa:(v,c)=>v.placa,mot:(v,c)=>v.mot||null,cfg:(v,c)=>S.cfg[v.placa]??v.cfg??null,km:(v,c)=>v.km??null,
+  fat:(v,c)=>c.fat,comb:(v,c)=>v.comb??null,com:(v,c)=>c.com,man:(v,c)=>c.man,fin:(v,c)=>c.fin,out:(v,c)=>c.out,
+  res:(v,c)=>c.res,pct:(v,c)=>c.pct,kml:(v,c)=>c.kml,mkm:(v,c)=>c.mkm,lkm:(v,c)=>c.lkm};
+const SORTL={placa:"placa",mot:"motorista",cfg:"configuração",km:"KM rodados",fat:"faturamento",comb:"combustível",com:"comissão",man:"manutenção",fin:"financiamento",out:"outras despesas",res:"resultado",pct:"% lucratividade",kml:"KM/L",mkm:"manutenção/KM",lkm:"lucro/KM"};
+
+function render(){
+  document.getElementById("thCom").firstChild.textContent=`Comissão (${S.rate}%)`;
+  const rows=V.map(v=>({v,c:calc(v)}));
+  const {k,d}=S.sort, f=SORTK[k], dir=d==="asc"?1:-1;
+  rows.sort((a,b)=>{
+    const x=f(a.v,a.c),y=f(b.v,b.c);
+    if(x==null&&y==null)return a.v.placa.localeCompare(b.v.placa);
+    if(x==null)return 1; if(y==null)return -1;
+    return (typeof x==="string"?x.localeCompare(y,"pt-BR"):x-y)*dir;
+  });
+  document.getElementById("subTxt").textContent=`Ordenado por ${SORTL[k]} ${d==="asc"?"crescente":"decrescente"}`;
+  document.querySelectorAll("thead th[data-sort]").forEach(th=>{
+    const on=th.dataset.sort===k; th.classList.toggle("act",on);
+    th.querySelector(".ar").textContent=on?(d==="asc"?"▲":"▼"):"⇅";
+  });
+  const dash='<span class="na">—</span>';
+  document.getElementById("rows").innerHTML=rows.map(({v,c})=>{
+    const cfg=S.cfg[v.placa]??v.cfg;
+    const tipMan=v.mc?"Direto na placa R$ "+nf2.format(v.md)+(v.mb?" ("+MC.map((n,i)=>v.mb[i]?n+" "+nf2.format(v.mb[i]):"").filter(Boolean).join(" · ")+")":"")+(MQ?" + cota das despesas sem placa R$ "+nf2.format(MQ)+" (R$ "+nf2.format(MQT)+" ÷ 17)":""):"";
+    return `<tr>
+      <td class="l placa"${v.fn||v.w?` title="${((v.fn||"")+(v.fn&&v.w?" · ":"")+(v.w||"")).replace(/"/g,'&quot;')}"`:""}>${v.placa}</td>
+      <td class="l mot">${v.mot&&v.mot!=="—"?v.mot:dash}</td>
+      <td class="l cfg"><select class="cfgsel" data-p="${v.placa}"><option value=""${!cfg?" selected":""}>—</option><option${cfg==="6X2"?" selected":""}>6X2</option><option${cfg==="6X4"?" selected":""}>6X4</option></select></td>
+      <td class="c-km">${v.km!=null?nf0.format(v.km):dash}</td>
+      <td class="c-fat"><input class="cell" data-k="fat" data-p="${v.placa}" placeholder="R$ 0" value="${c.fat!=null?nf0.format(c.fat):""}"></td>
+      <td class="c-comb">${v.comb!=null?brl(v.comb):dash}</td>
+      <td class="c-com">${c.com!=null?brl(c.com):dash}</td>
+      <td class="c-man" title="${tipMan}"><input class="cell" data-k="man" data-p="${v.placa}" placeholder="R$ 0" value="${c.man!=null?nf0.format(c.man):""}"></td>
+      <td class="c-fin"><input class="cell" data-k="fin" data-p="${v.placa}" placeholder="R$ 0" value="${c.fin!=null?nf0.format(c.fin):""}"></td>
+      <td class="c-out${v.od&&c.out?" clk":""}"${c.out?` title="${(v.od?"Clique para ver o descritivo · ":"")+Object.entries(v.ob||{}).map(([kk,x])=>kk+" "+nf2.format(x)).join(" · ")}"`:""}${v.od&&c.out?` data-od="${v.placa}"`:""}>${c.out!=null?brl(c.out):dash}</td>
+      <td class="${c.res!=null?cls(c.res):"na"}">${c.res!=null?brl(c.res):"—"}</td>
+      <td class="${c.pct!=null?cls(c.pct):"na"}">${c.pct!=null?pctF(c.pct):"—"}</td>
+      <td>${c.kml!=null?nf2.format(c.kml):dash}</td>
+      <td class="manut-km">${c.mkm!=null?brl2(c.mkm)+"/km":dash}</td>
+      <td class="${c.lkm!=null?cls(c.lkm):"na"}">${c.lkm!=null?brl2(c.lkm)+"/km":"—"}</td>
+    </tr>`;}).join("");
+
+  // Totais
+  const withFuel=V.filter(v=>v.comb!=null);
+  const anyFuel=withFuel.length>0;
+  const km=withFuel.reduce((a,v)=>a+v.km,0), lit=withFuel.reduce((a,v)=>a+v.l,0), comb=withFuel.reduce((a,v)=>a+v.comb,0);
+  const full=rows.filter(r=>r.c.res!=null);
+  const base=anyFuel?full:rows.filter(r=>r.c.fat!=null);
+  const fatB=base.reduce((a,r)=>a+r.c.fat,0), comB=base.reduce((a,r)=>a+r.c.com,0), hasFat=base.length>0;
+  const man=rows.reduce((a,r)=>a+(r.c.man||0),0), res=full.reduce((a,r)=>a+r.c.res,0),
+        kmF=full.reduce((a,r)=>a+r.v.km,0);
+  const finT=rows.reduce((a,r)=>a+(r.c.fin||0),0), outT=rows.reduce((a,r)=>a+(r.c.out||0),0);
+  const have=full.length>0;
+  document.getElementById("foot").innerHTML=`<tr>
+    <td class="l" colspan="3">TOTAL (${have?full.length+" de "+V.length+" com faturamento":anyFuel?withFuel.length+" veículos c/ combustível":base.length+" de "+V.length+" com faturamento"})</td>
+    <td class="c-km">${anyFuel?nf0.format(km):"—"}</td>
+    <td>${hasFat?brl(fatB):"—"}</td><td class="c-comb">${anyFuel?brl(comb):"—"}</td>
+    <td class="c-com">${hasFat?brl(comB):"—"}</td><td class="c-man">${man?brl(man):"—"}</td>
+    <td class="c-fin">${finT?brl(finT):"—"}</td><td class="c-out">${outT?brl(outT):"—"}</td>
+    <td class="${have?cls(res):"na"}">${have?brl(res):"—"}</td>
+    <td class="${have?cls(res):"na"}">${have&&fatB?pctF(res/fatB*100):"—"}</td>
+    <td>${lit?nf2.format(km/lit):"—"}</td><td class="manut-km">${man&&kmF?brl2(man/kmF)+"/km":"—"}</td>
+    <td class="${have?cls(res):"na"}">${have&&kmF?brl2(res/kmF)+"/km":"—"}</td></tr>`;
+
+  document.getElementById("cards").innerHTML=[
+    ["Faturamento",hasFat?brl(fatB):"—",""],
+    ["Combustível (frota)",anyFuel?brl(comb):"—","c-comb"],
+    ["Comissão",hasFat?brl(comB):"—","c-com"],
+    ["Manutenção",man?brl(man):"—","c-man"],
+    ["Custo comb./KM",km?brl2(comb/km)+"/km":"—","c-km"]
+  ].map(([t,v,kk])=>`<div class="card"><small>${t}</small><b class="${kk}">${v}</b></div>`).join("");
+
+  // aviso
+  let b="";
+  if(!anyFuel){b=`Combustível, KM, manutenção e financiamento de ${MONTHS[MONTH].label} ainda não foram carregados: Resultado, % Lucr., KM/L e custos por km ficam em branco. Faturamento e comissão já estão lançados.`;}
+  else{
+    const faltaMan=rows.filter(r=>r.v.comb!=null&&r.c.man==null).length;
+    const orf=rows.filter(r=>r.c.fat!=null&&r.v.comb==null).map(r=>r.v.placa);
+    if(faltaMan)b=`Manutenção ainda não informada em ${faltaMan} veículo(s): Resultado, % Lucr. e Lucro/KM estão <b>parciais</b> (sem o custo de manutenção).`;
+    if(orf.length)b+=(b?" ":"")+`Faturamento sem combustível lançado em ${orf.join(", ")} — fora dos totais e do resultado.`;
+  }
+  document.getElementById("banner").innerHTML=b;
+
+  renderHeat(rows);
+  bind();
+  fitTable();
+  renderSim();
+}
+
+// ===================== MAPA DE CALOR =====================
+function renderHeat(rows){
+  const M=[
+    {t:"Resultado",s:"R$",f:(c,v)=>c.res,fmt:x=>brl(x),z:1},
+    {t:"% Lucr.",s:"s/ faturamento",f:(c,v)=>c.pct,fmt:x=>pctF(x),z:1},
+    {t:"Lucro/KM",s:"R$/km",f:(c,v)=>c.lkm,fmt:x=>brl2(x),z:1},
+    {t:"Faturamento",s:"R$",f:(c,v)=>c.fat,fmt:x=>brl(x),z:0},
+    {t:"KM/L",s:"eficiência",f:(c,v)=>c.kml,fmt:x=>nf2.format(x),z:0},
+    {t:"Comb./KM",s:"R$/km · menor = melhor",f:(c,v)=>(v.comb!=null&&v.km?v.comb/v.km:null),fmt:x=>brl2(x),z:0,inv:1},
+    {t:"Manut./KM",s:"R$/km · menor = melhor",f:(c,v)=>c.mkm,fmt:x=>brl2(x),z:0,inv:1},
+    {t:"Fat./KM",s:"R$/km",f:(c,v)=>(c.fat!=null&&v.km?c.fat/v.km:null),fmt:x=>brl2(x),z:0}
+  ];
+  const st=M.map(m=>{const a=rows.map(r=>m.f(r.c,r.v)).filter(x=>x!=null&&isFinite(x));return {mn:Math.min(...a),mx:Math.max(...a)};});
+  const score=(m,i,x)=>{const {mn,mx}=st[i];let s;
+    if(m.z){s=x>=0?(mx>0?x/mx:0):(mn<0?-(x/mn):0);}
+    else s=mx>mn?((x-mn)/(mx-mn))*2-1:0;
+    return m.inv?-s:s;};
+  const col=s=>{const a=Math.min(1,Math.abs(s)),al=(0.10+a*0.78).toFixed(2);
+    return s>=0?`rgba(45,212,191,${al})`:`rgba(251,90,110,${al})`;};
+  const head=M.map(m=>`<th>${m.t}<small>${m.s}</small></th>`).join("");
+  const body=rows.map(({v,c})=>`<tr><td class="pl">${v.placa}<span>${v.mot&&v.mot!=="—"?v.mot:"—"}</span></td>`+
+    M.map((m,i)=>{const x=m.f(c,v);
+      if(x==null||!isFinite(x))return `<td class="hc na">—</td>`;
+      const sc=score(m,i,x);
+      return `<td class="hc" style="background:${col(sc)}" title="${v.placa} · ${m.t}: ${m.fmt(x)}">${m.fmt(x)}</td>`;}).join("")+`</tr>`).join("");
+  document.getElementById("hm").innerHTML=`<div class="hm-h"><div><h2>Mapa de calor · desempenho por veículo</h2><p>Cada coluna é colorida pela sua própria escala: verde = melhor desempenho da frota, vermelho = pior. Linhas seguem a ordenação da tabela.</p></div>
+    <div class="hm-leg"><span>pior</span><i></i><span>melhor</span></div></div>
+    <div class="hm-w"><table class="hm-t"><thead><tr><th></th>${head}</tr></thead><tbody>${body}</tbody></table></div>
+    <div class="hm-f">Resultado, % Lucr. e Lucro/KM: negativo em vermelho, positivo em verde (escala em torno de zero). Demais colunas: escala mín–máx da frota; em Comb./KM e Manut./KM, menor custo = verde.</div>`;
+}
+
+// ===================== SIMULADOR =====================
+const SIMK="bx_simulador";
+let SIM={};
+function simDefaults(){
+  const wf=V.filter(v=>v.km&&v.l&&v.comb!=null);
+  const km=wf.reduce((a,v)=>a+v.km,0), l=wf.reduce((a,v)=>a+v.l,0), comb=wf.reduce((a,v)=>a+v.comb,0);
+  return {n:wf.length,km:wf.length?km/wf.length:0,atual:l?km/l:0,preco:l?comb/l:0,meta:2.30,pct:11,base:"eco"};
+}
+function simLoad(){
+  SIM={meta:{},ov:{}};
+  try{const r=JSON.parse(localStorage.getItem(SIMK));if(r&&r.ov)SIM.ov=r.ov;if(r&&r.meta)SIM.meta=r.meta}catch(e){}
+}
+function simSave(){try{localStorage.setItem(SIMK,JSON.stringify(SIM))}catch(e){}}
+const rnd=(x,d)=>{const p=Math.pow(10,d);return Math.round(x*p)/p};
+function simVal(){
+  const D=simDefaults(), o=SIM.ov;
+  const g=k=>(o[k]!=null&&o[k]!=="")?o[k]:D[k];
+  return {D,atual:g("atual"),meta:g("meta"),pct:g("pct"),base:o.base||"eco",preco:g("preco"),km:g("km"),n:g("n")};
+}
+function renderSim(){
+  if(!document.getElementById("view-sim"))return;
+  const {D,atual,meta,pct,base,preco,km,n}=simVal();
+  const rate=S.rate/100;
+  // médias de faturamento por veículo (para base comissão/faturamento)
+  const rowsC=V.map(v=>calc(v)).filter(c=>c.fat!=null);
+  const fatMed=rowsC.length?rowsC.reduce((a,c)=>a+c.fat,0)/rowsC.length:0;
+  const baseNm=`faturamento (comissão de ${nf2.format(S.rate)}% → ${nf2.format(pct)}%)`;
+  const setv=(id,val,dec)=>{const el=document.getElementById(id);if(document.activeElement!==el)el.value=val==null||isNaN(val)?"":nf2.format(val).replace(/\.(?=\d{3})/g,"");};
+  const put=(id,val,dec)=>{const el=document.getElementById(id);if(document.activeElement!==el)el.value=(val==null||isNaN(val))?"":(dec==null?String(rnd(val,2)).replace(".",","):nf2.format(val));};
+  put("sAtual",atual,2);put("sMeta",meta,2);put("sPct",pct,2);put("sPreco",preco,2);
+  put("sKm",km,0);document.getElementById("sKm").value=nf0.format(km);put("sN",n,0);document.getElementById("sN").value=String(Math.round(n));
+  document.getElementById("sPctH").textContent=`Hoje: ${nf2.format(S.rate)}% do faturamento`;
+  document.getElementById("sAtualH").textContent=D.atual?`Real do mês: ${nf2.format(D.atual)}`:"";
+  document.getElementById("sPrecoH").textContent=D.preco?`Real do mês: R$ ${nf2.format(D.preco)}/L`:"";
+  document.getElementById("sKmH").textContent=D.km?`Real do mês: ${nf0.format(D.km)} km`:"";
+  document.getElementById("sNH").textContent=D.n?`Com dados no mês: ${D.n}`:"";
+
+  // cenário
+  const calcSc=(atual,meta,km,preco)=>{
+    if(!(atual>0)||!(meta>0))return {lA:0,lN:0,lE:0,eco:0,mel:0};
+    const lA=km/atual,lE=Math.max(0,lA-km/meta),lN=lA-lE;
+    return {lA,lN,lE,eco:lE*preco,mel:meta/atual-1};
+  };
+  const sc=calcSc(atual,meta,km,preco);
+  const premio=sc.lE>0?fatMed*Math.max(0,pct/100-rate):0;
+  const liquido=sc.eco-premio;
+  const fatorN=n;
+
+
+  // barra
+  const pE=sc.eco>0?Math.max(0,Math.min(100,premio/sc.eco*100)):0;
+  document.getElementById("sBar").innerHTML=sc.eco>0?`<div class="bar"><i style="width:${pE}%;background:var(--yel)"></i><i style="width:${100-pE}%;background:var(--teal)"></i></div>
+    <div class="bar-l"><span><span class="dot" style="background:var(--yel)"></span>Motorista <b>${brl(premio*fatorN)}</b> (${pctF(pE)})</span><span><span class="dot" style="background:var(--teal)"></span>Empresa <b>${brl(liquido*fatorN)}</b> (${pctF(100-pE)})</span></div>
+    <p class="lead" style="margin:10px 0 0">Comissão sobe de ${nf2.format(S.rate)}% para ${nf2.format(pct)}% do faturamento ao atingir a meta (prêmio médio de ${brl(premio)} por veículo).</p>`:`<p class="lead" style="margin:0">Informe uma meta maior que a média atual para simular.</p>`;
+  // antes x depois
+  const cA=atual>0?preco/atual:0,cN=meta>0?preco/meta:0;
+  document.getElementById("sCmp").innerHTML=`<table><thead><tr><th></th><th>Hoje</th><th>Na meta</th></tr></thead><tbody>
+    <tr><td>Média (km/L)</td><td>${nf2.format(atual)}</td><td>${nf2.format(meta)}</td></tr>
+    <tr><td>Litros por veículo/mês</td><td>${nf0.format(sc.lA)}</td><td>${nf0.format(sc.lN)}</td></tr>
+    <tr><td>Combustível por veículo/mês</td><td>${brl(sc.lA*preco)}</td><td>${brl(sc.lN*preco)}</td></tr>
+    <tr><td>Custo de combustível/km</td><td>${brl2(cA)}</td><td>${brl2(cN)}</td></tr>
+    <tr><td>Combustível da frota/mês</td><td>${brl(sc.lA*preco*fatorN)}</td><td>${brl(sc.lN*preco*fatorN)}</td></tr></tbody></table>`;
+
+  // por veículo
+  const heads=["Placa","Motorista","KM","Faturamento","Média atual","Meta","Δ média","Litros hoje","Litros na meta","Litros poupados","Economia","Prêmio","Comissão atual","Comissão na meta","Líquido empresa"];
+  document.getElementById("sHead").innerHTML=heads.map((h,i)=>`<th style="text-align:${i<2?"left":"right"};cursor:default">${h}</th>`).join("");
+  let T={km:0,lE:0,eco:0,pr:0,li:0,lA:0,lN:0,fat:0,ca:0,cm:0};
+  const rows=V.filter(v=>v.km&&v.l).map(v=>{
+    const a=v.km/v.l, mt=SIM.meta[v.placa]!=null?SIM.meta[v.placa]:meta;
+    const s=calcSc(a,mt,v.km,preco), c=calc(v);
+    const pr=s.lE>0?(c.fat??0)*Math.max(0,pct/100-rate):0, li=s.eco-pr;
+    T.km+=v.km;T.fat+=c.fat||0;T.ca+=c.com||0;T.cm+=(c.com||0)+(s.lE>0?pr:0);T.lE+=s.lE;T.eco+=s.eco;T.pr+=pr;T.li+=li;T.lA+=s.lA;T.lN+=s.lN;
+    return {v,c,a,mt,s,pr,li,ov:SIM.meta[v.placa]!=null};
+  }).sort((x,y)=>y.li-x.li);
+  document.getElementById("sRows").innerHTML=rows.map(({v,c,a,mt,s,pr,li,ov})=>{
+    const ok=s.lE>0;
+    return `<tr><td class="l placa">${v.placa}</td><td class="l mot">${v.mot&&v.mot!=="—"?v.mot:'<span class="na">—</span>'}</td>
+      <td class="c-km">${nf0.format(v.km)}</td>
+      <td><input class="cell" data-sf="${v.placa}" placeholder="R$ 0" value="${c.fat!=null?nf0.format(c.fat):""}" title="Faturamento do mês (o mesmo da aba Resultado)"></td>
+      <td>${nf2.format(a)}</td>
+      <td><input class="cell" data-sm="${v.placa}" value="${nf2.format(mt)}" title="Meta deste veículo (km/L)"${ov?' style="color:var(--gold)"':""}></td>
+      <td class="${ok?"pos":"na"}">${ok?"+"+pctF(s.mel*100):"já na meta"}</td>
+      <td>${nf0.format(s.lA)}</td><td>${nf0.format(s.lN)}</td><td>${ok?nf0.format(s.lE):'<span class="na">—</span>'}</td>
+      <td class="c-km">${ok?brl(s.eco):'<span class="na">—</span>'}</td><td class="c-man">${ok?brl(pr):'<span class="na">—</span>'}</td>
+      <td class="c-com">${c.com!=null?brl(c.com):'<span class="na">—</span>'}</td>
+      <td class="c-com" style="font-weight:800" title="Comissão atual + prêmio pela meta">${c.com!=null?brl(c.com+(ok?pr:0)):'<span class="na">—</span>'}</td>
+      <td class="${ok?cls(li):"na"}">${ok?brl(li):"—"}</td></tr>`;}).join("");
+  document.getElementById("sFoot").innerHTML=`<tr><td class="l" colspan="2">TOTAL (${rows.length} veículos)</td><td class="c-km">${nf0.format(T.km)}</td><td>${T.fat?brl(T.fat):"—"}</td><td></td><td></td><td></td>
+    <td>${nf0.format(T.lA)}</td><td>${nf0.format(T.lN)}</td><td>${nf0.format(T.lE)}</td>
+    <td class="c-km">${brl(T.eco)}</td><td class="c-man">${brl(T.pr)}</td><td class="c-com">${brl(T.ca)}</td><td class="c-com">${brl(T.cm)}</td><td class="${cls(T.li)}">${brl(T.li)}</td></tr>`;
+  document.getElementById("sFoot2").innerHTML=`<b>Como é calculado:</b> litros = KM ÷ média; economia = (litros hoje − litros na meta) × preço do diesel; prêmio do motorista = faturamento × (comissão na meta ${nf2.format(pct)}% − comissão atual ${nf2.format(S.rate)}%), pago só se o veículo melhora a média; economia líquida da empresa = economia − prêmio. Preço do diesel e KM mensais valem para todos os veículos (padrão: média real de ${MONTHS[MONTH].label}). Resultado financeiro estimado, sem considerar variações de preço, carga ou rota.`;
+  document.getElementById("sNote").textContent=SIM.ov&&Object.keys(SIM.ov).length||Object.keys(SIM.meta).length?"Valores editados (salvos neste navegador).":"";
+}
+function bindSim(){
+  const map={sAtual:"atual",sMeta:"meta",sPct:"pct",sPreco:"preco",sKm:"km",sN:"n"};
+  Object.entries(map).forEach(([id,k])=>{
+    const el=document.getElementById(id);
+    el.addEventListener("change",()=>{const n=parse(el.value);if(n==null||n<0)delete SIM.ov[k];else SIM.ov[k]=n;simSave();renderSim();});
+    el.addEventListener("focus",()=>el.select());
+  });
+  document.getElementById("sBase").addEventListener("change",e=>{SIM.ov.base=e.target.value;simSave();renderSim();});
+  document.getElementById("sReset").onclick=()=>{SIM={meta:{},ov:{}};simSave();renderSim();};
+  document.getElementById("sRows").addEventListener("change",e=>{
+    const sf=e.target.closest("input[data-sf]");
+    if(sf){const n=parse(sf.value);if(n==null)delete S.fat[sf.dataset.sf];else S.fat[sf.dataset.sf]=n;save();render();return;}
+    const el=e.target.closest("input[data-sm]");if(!el)return;
+    const n=parse(el.value);if(n==null||n<=0)delete SIM.meta[el.dataset.sm];else SIM.meta[el.dataset.sm]=n;simSave();renderSim();
+  });
+}
+
+// ===================== INTERAÇÃO =====================
+function fitTable(){
+  const tw=document.querySelector("#view-res .tw"),t=tw.querySelector("table");
+  t.style.zoom=1;
+  if(window.innerWidth<=900||!tw.clientWidth)return;
+  const need=t.scrollWidth,have=tw.clientWidth;
+  if(need>have)t.style.zoom=(have/need*0.995).toFixed(4);
+}
+window.addEventListener("resize",fitTable);
+
+function bind(){
+  document.querySelectorAll("input.cell[data-k]").forEach(i=>{
+    i.onchange=()=>{
+      const n=parse(i.value), m=S[i.dataset.k];
+      if(n==null)delete m[i.dataset.p]; else m[i.dataset.p]=n;
+      save();render();
+    };
+  });
+  document.querySelectorAll("select.cfgsel").forEach(s=>{
+    s.onchange=()=>{S.cfg[s.dataset.p]=s.value;save();};
+  });
+}
+document.querySelectorAll("thead th[data-sort]").forEach(th=>th.addEventListener("click",()=>{
+  const k=th.dataset.sort;
+  S.sort=S.sort.k===k?{k,d:S.sort.d==="asc"?"desc":"asc"}:{k,d:(k==="placa"||k==="mot"||k==="cfg")?"asc":"desc"};
+  try{localStorage.setItem(KEY+"_sort",JSON.stringify(S.sort))}catch(e){}
+  render();
+}));
+document.getElementById("rate").addEventListener("change",e=>{S.rate=parseFloat(e.target.value)||0;save();render();});
+document.getElementById("useFin").addEventListener("change",e=>{S.useFin=e.target.checked;save();render();});
+document.getElementById("btnReset").onclick=()=>{if(confirm("Restaurar os valores originais de faturamento, manutenção e financiamento deste mês?")){S.fat={};S.man={};S.fin={};save();render();}};
+document.getElementById("btnCsv").onclick=()=>{
+  const h=["Placa","Motorista","Config","KM","Litros","KM/L","Faturamento","Combustivel","Comissao","Manutencao","Financiamento","OutrasDespesas","Resultado","%Lucr","Manut/KM","Lucro/KM"];
+  const L=[h.join(";")];
+  V.forEach(v=>{const c=calc(v);const f=x=>x==null?"":String(Math.round(x*100)/100).replace(".",",");
+    L.push([v.placa,v.mot,S.cfg[v.placa]??v.cfg,f(v.km),f(v.l),f(c.kml),f(c.fat),f(v.comb),f(c.com),f(c.man),f(c.fin),f(c.out),f(c.res),f(c.pct),f(c.mkm),f(c.lkm)].join(";"));});
+  const b=new Blob(["﻿"+L.join("\n")],{type:"text/csv;charset=utf-8"});
+  const a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="bx_resultado_veiculos_"+MONTH+".csv";a.click();
+};
+// abas
+function setTab(t){
+  document.querySelectorAll(".tabs button").forEach(b=>b.classList.toggle("on",b.dataset.tab===t));
+  document.getElementById("view-res").classList.toggle("on",t==="res");
+  document.getElementById("view-sim").classList.toggle("on",t==="sim");
+  try{localStorage.setItem("bx_resultado_tab",t)}catch(e){}
+  if(t==="res")fitTable();
+}
+document.querySelectorAll(".tabs button").forEach(b=>b.addEventListener("click",()=>setTab(b.dataset.tab)));
+// pop-up outras despesas
+function openOD(pl){
+  const v=V.find(x=>x.placa===pl); if(!v||!v.od)return;
+  const tot=v.od.reduce((a,x)=>a+x[4],0), by={};
+  v.od.forEach(x=>by[x[1]]=(by[x[1]]||0)+x[4]);
+  const esc=t=>String(t).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+  document.getElementById("mdT").textContent="Outras despesas · "+pl+(v.mot&&v.mot!=="—"?" · "+v.mot:"");
+  document.getElementById("mdS").textContent=MONTHS[MONTH].label+" · "+v.od.length+" lançamento(s)";
+  document.getElementById("mdC").innerHTML=Object.entries(by).sort((a,b)=>b[1]-a[1]).map(([k,x])=>`<span class="md-chip">${esc(k)}<b>${brl2(x)}</b></span>`).join("");
+  document.getElementById("mdB").innerHTML=`<table><thead><tr><th>Data</th><th>Tipo</th><th>Fornecedor</th><th>Descritivo</th><th class="r">Valor</th></tr></thead><tbody>`+
+    v.od.map(x=>`<tr><td class="d">${x[0]}</td><td>${esc(x[1])}</td><td>${esc(x[2])}</td><td>${esc(x[3])}</td><td class="r v">${brl2(x[4])}</td></tr>`).join("")+`</tbody></table>`;
+  document.getElementById("mdTot").textContent=brl2(tot);
+  document.getElementById("mdBg").classList.add("on");
+}
+const closeOD=()=>document.getElementById("mdBg").classList.remove("on");
+document.getElementById("rows").addEventListener("click",e=>{const td=e.target.closest("td[data-od]");if(td)openOD(td.dataset.od);});
+document.getElementById("mdBg").addEventListener("click",e=>{if(e.target.id==="mdBg"||e.target.closest(".md-x"))closeOD();});
+document.addEventListener("keydown",e=>{if(e.key==="Escape")closeOD();});
+
+document.getElementById("month").addEventListener("change",e=>{loadMonth(e.target.value);render();});
+(function(){
+  const q=new URLSearchParams(location.search);
+  let m=q.get("m");
+  if(!MONTHS[m]){try{m=localStorage.getItem("bx_resultado_month")}catch(e){}}
+  if(!MONTHS[m])m="2026-10";
+  let t=q.get("tab");
+  simLoad(); bindSim();
+  loadMonth(m); render();
+  setTab(t==="res"?"res":"sim");
+})();
+</script>
+</body>
+</html>
